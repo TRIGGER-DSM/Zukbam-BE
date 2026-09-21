@@ -6,15 +6,15 @@ import jakarta.validation.constraints.Email;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import java.time.LocalDateTime;
 
-import java.util.Date;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Getter
-@Table(name = "tbl_user")
+@Table(name = "tbl_users")
 public class User {
 
     @Id
@@ -33,11 +33,11 @@ public class User {
 
     @Column(nullable = false, name = "created_at")
     @CreatedDate
-    private Date createdAt;
+    private LocalDateTime createdAt;
 
     @Column(nullable = false, name = "updated_at")
     @LastModifiedDate
-    private Date updatedAt;
+    private LocalDateTime updatedAt;
 
     @Column(nullable = false, name = "phone_number")
     private String phoneNumber;
