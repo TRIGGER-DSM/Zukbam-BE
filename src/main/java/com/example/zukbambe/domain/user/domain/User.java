@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Email;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import java.time.LocalDateTime;
 
 
@@ -15,35 +17,37 @@ import java.time.LocalDateTime;
 @Builder
 @Getter
 @Table(name = "tbl_users")
+@EntityListeners(AuditingEntityListener.class)
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
 
-    @Column(nullable = false, unique = true, name = "email")
+    @Column(length = 320, nullable = false, unique = true, name = "email")
     @Email
     private String email;
 
-    @Column(nullable = false, name = "password")
+    @Column(length = 60, nullable = false, name = "password")
     private String password;
 
-    @Column(nullable = false, name = "name")
+    @Column(length = 255, nullable = false, name = "name")
     private String name;
 
-    @Column(nullable = false, name = "created_at")
     @CreatedDate
+    @Column(nullable = false, updatable = false, name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column(nullable = false, name = "updated_at")
     @LastModifiedDate
+    @Column(nullable = false, name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Column(nullable = false, name = "phone_number")
+    @Column(columnDefinition = "CHAR(15)", nullable = false, name = "phone_number")
     private String phoneNumber;
 
+    @Builder.Default
     @Column(nullable = false, name = "score")
-    private String score;
+    private Long score = 0L;
 
     @Column(nullable = false, name = "role")
     @Enumerated(EnumType.STRING)
