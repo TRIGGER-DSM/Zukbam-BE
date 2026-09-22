@@ -18,15 +18,16 @@ public class Problem {
     @Column(unique = true, nullable = false, name = "title")
     private String title;
 
-    @Column(nullable = false, name = "content")
+    @Column(columnDefinition = "TEXT", nullable = false, name = "content")
     private String content;
 
     @Column(nullable = false, name = "memory_limit")
-    private Long memory_limit;
+    private Long memoryLimit;
 
     @Column(nullable = false, name = "time_limit")
-    private Long time_limit;
+    private Long timeLimit;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, name = "rank")
     private Rank rank;
 }
