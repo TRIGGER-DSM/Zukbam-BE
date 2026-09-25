@@ -18,25 +18,25 @@ public class Solution {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long solutionId;
 
-    @OneToOne(mappedBy = "solution", cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_id", referencedColumnName = "userId")
-    private User userId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    @OneToOne(mappedBy = "solution", cascade = CascadeType.ALL)
-    @JoinColumn(name = "problem_id", referencedColumnName = "problemId")
-    private Problem problemId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "problem_id", nullable = false)
+    private Problem problem;
 
     @Column(nullable = false, name = "status")
     @Enumerated(EnumType.STRING)
     private Status status;
 
     @Column(nullable = false, name = "memory_used")
-    private Long memory_used;
+    private Long memoryUsed;
 
     @Column(nullable = false, name = "time")
     private Long time;
 
-    @Column(nullable = false, name = "code")
+    @Column(columnDefinition = "TEXT", nullable = false, name = "code")
     private String code;
 
     @Column(nullable = false, name = "language")

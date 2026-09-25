@@ -1,4 +1,4 @@
-package com.example.zukbambe.domain.group.domain;
+package com.example.zukbambe.domain.friend.domain;
 
 import com.example.zukbambe.domain.user.domain.User;
 import jakarta.persistence.*;
@@ -13,36 +13,32 @@ import java.time.LocalDateTime;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Getter
-@Table(name = "tbl_group_members")
+@Table(name = "tbl_friends")
 @EntityListeners(AuditingEntityListener.class)
-public class GroupMember {
+public class Friend {
 
     @EmbeddedId
-    private GroupMemberId id;
+    private FriendId id;
 
     @MapsId("userId")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @MapsId("groupId")
+    @MapsId("friendId")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "group_id", nullable = false)
-    private Group group;
+    @JoinColumn(name = "friend_id", nullable = false)
+    private User friend;
 
     @CreatedDate
-    @Column(nullable = false, updatable = false, name = "join_date")
-    private LocalDateTime joinDate;
+    @Column(nullable = false, updatable = false, name = "created_at")
+    private LocalDateTime createdAt;
 
-    @Column(nullable = false, name = "is_host")
-    private Boolean isHost;
-
-    public static GroupMember of(User user, Group group, Boolean isHost) {
-        return GroupMember.builder()
-                .id(new GroupMemberId(user.getUserId(), group.getGroupId()))
+    public static Friend of(User user, User friend) {
+        return Friend.builder()
+                .id(new FriendId(user.getUserId(), friend.getUserId()))
                 .user(user)
-                .group(group)
-                .isHost(isHost)
+                .friend(friend)
                 .build();
     }
 }

@@ -1,4 +1,4 @@
-package com.example.zukbambe.domain.group.domain;
+package com.example.zukbambe.domain.friend.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -12,24 +12,24 @@ import java.util.Objects;
 @AllArgsConstructor
 @Builder
 @Getter
-public class GroupMemberId implements Serializable {
+public class FriendId implements Serializable {
 
     @Column(name = "user_id")
     private Long userId;
 
-    @Column(name = "group_id")
-    private Long groupId;
+    @Column(name = "friend_id")
+    private Long friendId;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof GroupMemberId that)) return false;
+        if (!(o instanceof FriendId that)) return false;
         return Objects.equals(userId, that.userId)
-                && Objects.equals(groupId, that.groupId);
+                && Objects.equals(friendId, that.friendId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(userId, groupId);
+        return Objects.hash(userId, friendId);
     }
 }

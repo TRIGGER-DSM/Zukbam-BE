@@ -15,17 +15,17 @@ public class TestCase {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long testcaseId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "problem_id")
-    private Problem problemId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "problem_id", nullable = false)
+    private Problem problem;
 
-    @Column(name = "example_read")
+    @Column(columnDefinition = "TEXT", name = "example_read")
     private String exampleRead;
 
-    @Column(nullable = false, name = "example_write")
+    @Column(columnDefinition = "TEXT", nullable = false, name = "example_write")
     private String exampleWrite;
 
     @Column(nullable = false, name = "is_sample")
-    private Boolean IsSample;
+    private Boolean isSample;
 
 }

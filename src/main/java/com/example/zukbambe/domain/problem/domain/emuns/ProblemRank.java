@@ -1,5 +1,5 @@
 package com.example.zukbambe.domain.problem.domain.emuns;
 
-public enum Rank {
+public enum ProblemRank {
 
 }

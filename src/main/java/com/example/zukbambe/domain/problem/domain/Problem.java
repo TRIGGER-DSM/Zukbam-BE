@@ -1,6 +1,6 @@
 package com.example.zukbambe.domain.problem.domain;
 
-import com.example.zukbambe.domain.problem.domain.emuns.Rank;
+import com.example.zukbambe.domain.problem.domain.emuns.ProblemRank;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -28,6 +28,6 @@ public class Problem {
     private Long timeLimit;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, name = "rank")
-    private Rank rank;
+    @Column(nullable = false, name = "problem_rank")
+    private ProblemRank rank;
 }

@@ -1,5 +1,6 @@
 package com.example.zukbambe.domain.user.domain;
 
+import com.example.zukbambe.domain.rank.domain.UserRank;
 import com.example.zukbambe.domain.user.domain.enums.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -52,5 +53,9 @@ public class User {
     @Column(nullable = false, name = "role")
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_rank_id", nullable = false)
+    private UserRank rank;
 
 }
