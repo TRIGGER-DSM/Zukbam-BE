@@ -1,4 +1,4 @@
-package com.example.zukbambe.domain.solution.domain.eunms;
+package com.example.zukbambe.domain.solution.domain.enums;
 
 public enum Language {
     C,

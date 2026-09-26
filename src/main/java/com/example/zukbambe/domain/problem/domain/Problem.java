@@ -1,6 +1,6 @@
 package com.example.zukbambe.domain.problem.domain;
 
-import com.example.zukbambe.domain.problem.domain.emuns.ProblemRank;
+import com.example.zukbambe.domain.problem.domain.enums.ProblemRank;
 import jakarta.persistence.*;
 import lombok.*;
 

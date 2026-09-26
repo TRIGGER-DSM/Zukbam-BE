@@ -1,8 +1,8 @@
 package com.example.zukbambe.domain.solution.domain;
 
 import com.example.zukbambe.domain.problem.domain.Problem;
-import com.example.zukbambe.domain.solution.domain.eunms.Language;
-import com.example.zukbambe.domain.solution.domain.eunms.Status;
+import com.example.zukbambe.domain.solution.domain.enums.Language;
+import com.example.zukbambe.domain.solution.domain.enums.Status;
 import com.example.zukbambe.domain.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
