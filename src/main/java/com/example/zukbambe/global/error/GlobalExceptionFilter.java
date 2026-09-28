@@ -30,25 +30,25 @@ public class GlobalExceptionFilter extends OncePerRequestFilter {
             switch (e) {
                 case ZukBamException ze -> {
                     log.warn("{}: {} {}", ze.getClass().getSimpleName(), ze.getErrorCode().getStatus(), ze.getErrorCode().getMessage());
-                    writeErrorResponse(response, ze.getErrorCode());
+                    writeErrorResponse(response, ze.getErrorCode(), ze.getMessage());
                 }
                 case Exception ex when ex.getCause() instanceof ZukBamException ze -> {
                     log.warn("{}: {} {}", ze.getClass().getSimpleName(), ze.getErrorCode().getStatus(), ze.getErrorCode().getMessage());
-                    writeErrorResponse(response, ze.getErrorCode());
+                    writeErrorResponse(response, ze.getErrorCode(), ze.getMessage());
                 }
                 default -> {
                     log.error("Unhandled exception: {} {}", request.getMethod(), request.getRequestURI(), e);
-                    writeErrorResponse(response, GlobalErrorCode.INTERNAL_ERROR);
+                    writeErrorResponse(response, GlobalErrorCode.INTERNAL_ERROR, GlobalErrorCode.INTERNAL_ERROR.getMessage());
                 }
             }
         }
     }
 
-    private void writeErrorResponse(HttpServletResponse response, ErrorProperty errorCode) throws IOException {
+    private void writeErrorResponse(HttpServletResponse response, ErrorProperty errorCode, String message) throws IOException {
         response.resetBuffer();
         response.setStatus(errorCode.getStatus().value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8);
-        objectMapper.writeValue(response.getWriter(), ErrorResponse.of(errorCode));
+        objectMapper.writeValue(response.getWriter(), ErrorResponse.of(errorCode, message));
     }
 }
