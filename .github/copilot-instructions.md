@@ -13,32 +13,22 @@
 ## Review Comment Format
 Every review comment must follow this structure, in this exact order:
 
-1. **Severity** — one of the levels defined below
-2. **Problem** — what is wrong and why it matters
-3. **Suggestion** — how to fix it, followed by a `suggestion` block
-
-### Severity Levels
-- 🔴 **Critical**: Bugs, security vulnerabilities, data loss, crashes. Must be fixed before merge.
-- 🟠 **Major**: Incorrect logic, performance issues, missing error handling. Should be fixed.
-- 🟡 **Minor**: Readability, maintainability, naming, minor refactoring. Recommended.
-- 🔵 **Nit**: Style, formatting, trivial preferences. Optional.
+1. **Problem** — what is wrong and why it matters
+2. **Suggestion** — how to fix it, followed by a `suggestion` block
 
 ### Template
-```
-**중요도**: 🟠 Major
-
+~~~
 **문제 상황**
 <Describe the problem and its impact>
 
 **제안**
 <Describe the fix>
 
-​```suggestion
+```suggestion
 <code only>
-​```
 ```
+~~~
 
 ### Rules
-- Use exactly one severity level per comment.
 - Keep the Problem section concise (1–3 sentences) and explain the impact, not just the symptom.
 - If multiple unrelated issues exist, write separate comments for each.
