@@ -21,6 +21,11 @@ jobs:
         run: docker pull ghcr.io/${{ github.repository }}:latest
 
       - name: Deploy
+        env:
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JPA_DDL_AUTO: update
         run: |
           cd ~/trigger
           docker compose down
