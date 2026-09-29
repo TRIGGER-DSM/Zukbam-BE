@@ -10,6 +10,20 @@ permissions:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: zukbam
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
 
@@ -21,6 +35,11 @@ jobs:
 
       - name: Build & Test
         run: ./gradlew build
+        env:
+          DB_URL: jdbc:postgresql://localhost:5432/zukbam
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
+          JPA_DDL_AUTO: create-drop
 
   publish-image:
     needs: build-and-test
