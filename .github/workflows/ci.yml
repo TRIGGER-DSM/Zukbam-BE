@@ -15,8 +15,8 @@ jobs:
         image: postgres:16
         env:
           POSTGRES_DB: zukbam
-          POSTGRES_USER: ${{ secrets.DB_USERNAME }}
-          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
         ports:
           - 5432:5432
         options: >-
@@ -37,8 +37,8 @@ jobs:
         run: ./gradlew build
         env:
           DB_URL: jdbc:postgresql://localhost:5432/zukbam
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
           JPA_DDL_AUTO: create-drop
 
   publish-image:
