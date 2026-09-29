@@ -5,20 +5,25 @@ on:
     branches: [develop]
     types: [completed]
 
+permissions:
+  contents: read
+  packages: read
+
 jobs:
   deploy:
     if: github.event.workflow_run.conclusion == 'success'
     runs-on: self-hosted
     steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Pull latest image
-        run: docker pull ghcr.io/${{ github.repository }}:latest
 
       - name: Deploy
         env:
@@ -27,6 +32,7 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           JPA_DDL_AUTO: update
         run: |
-          cd ~/trigger
-          docker compose down
-          docker compose up -d
+          export APP_IMAGE=ghcr.io/$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]'):latest
+          docker compose -p zukbam pull backend
+          docker compose -p zukbam up -d --remove-orphans
+          docker image prune -f
