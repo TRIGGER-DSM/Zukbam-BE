@@ -1,5 +1,6 @@
 package com.example.zukbambe.global.security.jwt;
 
+import com.example.zukbambe.global.error.exception.ZukBamException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +14,8 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
+    public static final String EXCEPTION_ATTRIBUTE = "jwtException";
+
     private final JwtParser jwtParser;
 
     @Override
@@ -20,7 +23,11 @@ public class JwtFilter extends OncePerRequestFilter {
         String token = jwtParser.resolveToken(request);
 
         if (token != null) {
-            SecurityContextHolder.getContext().setAuthentication(jwtParser.getAuthentication(token));
+            try {
+                SecurityContextHolder.getContext().setAuthentication(jwtParser.getAuthentication(token));
+            } catch (ZukBamException e) {
+                request.setAttribute(EXCEPTION_ATTRIBUTE, e);
+            }
         }
 
         filterChain.doFilter(request, response);

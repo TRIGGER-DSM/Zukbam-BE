@@ -1,5 +1,6 @@
 package com.example.zukbambe.global.config;
 
+import com.example.zukbambe.global.error.exception.ZukBamException;
 import com.example.zukbambe.global.security.jwt.JwtFilter;
 import com.example.zukbambe.global.security.jwt.JwtParser;
 import com.example.zukbambe.global.security.jwt.exception.ForbiddenException;
@@ -42,6 +43,9 @@ public class SecurityConfig {
 
             .exceptionHandling(exception -> exception
                 .authenticationEntryPoint((request, response, e) -> {
+                    if (request.getAttribute(JwtFilter.EXCEPTION_ATTRIBUTE) instanceof ZukBamException tokenException) {
+                        throw tokenException;
+                    }
                     throw new UnauthorizedException();
                 })
                 .accessDeniedHandler((request, response, e) -> {
