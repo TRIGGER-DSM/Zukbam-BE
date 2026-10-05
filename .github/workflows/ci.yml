@@ -40,6 +40,7 @@ jobs:
           DB_USERNAME: postgres
           DB_PASSWORD: postgres
           JPA_DDL_AUTO: create-drop
+          JWT_SECRET: zukbam-ci-secret-key-must-be-at-least-32-bytes
 
   publish-image:
     needs: build-and-test
