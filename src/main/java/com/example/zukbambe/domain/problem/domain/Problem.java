@@ -30,4 +30,12 @@ public class Problem {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, name = "problem_rank")
     private ProblemRank rank;
+
+    public void update(String title, String content, Long memoryLimit, Long timeLimit, ProblemRank rank) {
+        this.title = title;
+        this.content = content;
+        this.memoryLimit = memoryLimit;
+        this.timeLimit = timeLimit;
+        this.rank = rank;
+    }
 }
