@@ -1,5 +1,6 @@
 package com.example.zukbambe.global.config;
 
+import com.example.zukbambe.domain.user.domain.enums.Role;
 import com.example.zukbambe.global.error.exception.ZukBamException;
 import com.example.zukbambe.global.security.jwt.JwtFilter;
 import com.example.zukbambe.global.security.jwt.JwtParser;
@@ -8,6 +9,7 @@ import com.example.zukbambe.global.security.jwt.exception.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -38,6 +40,9 @@ public class SecurityConfig {
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/error").permitAll()
                 .requestMatchers("/auth/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/problems").hasRole(Role.TEACHER.name())
+                .requestMatchers(HttpMethod.PUT, "/problems/*").hasRole(Role.TEACHER.name())
+                .requestMatchers(HttpMethod.DELETE, "/problems/*").hasRole(Role.TEACHER.name())
                 .anyRequest().authenticated()
             )
 
