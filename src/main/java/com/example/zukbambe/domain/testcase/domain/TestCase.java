@@ -28,4 +28,12 @@ public class TestCase {
     @Column(nullable = false, name = "is_sample")
     private Boolean isSample;
 
+    public static TestCase of(Problem problem, String exampleRead, String exampleWrite, Boolean isSample) {
+        return TestCase.builder()
+                .problem(problem)
+                .exampleRead(exampleRead)
+                .exampleWrite(exampleWrite)
+                .isSample(isSample)
+                .build();
+    }
 }
