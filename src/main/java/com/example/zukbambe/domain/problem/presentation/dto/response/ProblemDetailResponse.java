@@ -3,9 +3,11 @@ package com.example.zukbambe.domain.problem.presentation.dto.response;
 import com.example.zukbambe.domain.problem.domain.Problem;
 import com.example.zukbambe.domain.problem.domain.enums.ProblemRank;
 import com.example.zukbambe.domain.testcase.domain.TestCase;
+import lombok.Builder;
 
 import java.util.List;
 
+@Builder
 public record ProblemDetailResponse(
     Long problemId,
     String title,
@@ -16,14 +18,14 @@ public record ProblemDetailResponse(
     List<TestCaseResponse> testCases
 ) {
     public static ProblemDetailResponse of(Problem problem, List<TestCase> testCases) {
-        return new ProblemDetailResponse(
-            problem.getProblemId(),
-            problem.getTitle(),
-            problem.getContent(),
-            problem.getMemoryLimit(),
-            problem.getTimeLimit(),
-            problem.getRank(),
-            testCases.stream().map(TestCaseResponse::from).toList()
-        );
+        return ProblemDetailResponse.builder()
+            .problemId(problem.getProblemId())
+            .title(problem.getTitle())
+            .content(problem.getContent())
+            .memoryLimit(problem.getMemoryLimit())
+            .timeLimit(problem.getTimeLimit())
+            .rank(problem.getRank())
+            .testCases(testCases.stream().map(TestCaseResponse::from).toList())
+            .build();
     }
 }
