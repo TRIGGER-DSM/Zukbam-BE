@@ -4,7 +4,7 @@ import com.example.zukbambe.domain.problem.domain.Problem;
 import com.example.zukbambe.domain.problem.domain.repository.ProblemRepository;
 import com.example.zukbambe.domain.problem.exception.ProblemTitleDuplicatedException;
 import com.example.zukbambe.domain.problem.presentation.dto.request.ProblemRequest;
-import com.example.zukbambe.domain.problem.presentation.dto.response.ProblemIdResponse;
+import com.example.zukbambe.domain.testcase.domain.TestCase;
 import com.example.zukbambe.domain.testcase.domain.repository.TestCaseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,7 @@ public class CreateProblemService {
     private final TestCaseRepository testCaseRepository;
 
     @Transactional
-    public ProblemIdResponse execute(ProblemRequest request) {
+    public Long execute(ProblemRequest request) {
         if (problemRepository.existsByTitle(request.title())) {
             throw new ProblemTitleDuplicatedException();
         }
@@ -35,10 +35,10 @@ public class CreateProblemService {
 
         testCaseRepository.saveAll(
             request.testCases().stream()
-                .map(testCase -> testCase.toEntity(problem))
+                .map(testCase -> TestCase.of(problem, testCase.input(), testCase.output(), testCase.isSample()))
                 .toList()
         );
 
-        return new ProblemIdResponse(problem.getProblemId());
+        return problem.getProblemId();
     }
 }
