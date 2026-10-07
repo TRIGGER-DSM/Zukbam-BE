@@ -5,6 +5,7 @@ import com.example.zukbambe.domain.problem.domain.repository.ProblemRepository;
 import com.example.zukbambe.domain.problem.exception.ProblemTitleDuplicatedException;
 import com.example.zukbambe.domain.problem.facade.ProblemFacade;
 import com.example.zukbambe.domain.problem.presentation.dto.request.ProblemRequest;
+import com.example.zukbambe.domain.testcase.domain.TestCase;
 import com.example.zukbambe.domain.testcase.domain.repository.TestCaseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,7 @@ public class UpdateProblemService {
         testCaseRepository.deleteAllByProblem(problem);
         testCaseRepository.saveAll(
             request.testCases().stream()
-                .map(testCase -> testCase.toEntity(problem))
+                .map(testCase -> TestCase.of(problem, testCase.input(), testCase.output(), testCase.isSample()))
                 .toList()
         );
     }
