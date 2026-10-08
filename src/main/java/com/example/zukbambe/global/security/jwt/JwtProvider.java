@@ -22,6 +22,10 @@ public class JwtProvider {
         return generateToken(userId, role, TokenType.REFRESH);
     }
 
+    public Long getRefreshExp() {
+        return jwtProperties.refreshExp();
+    }
+
     private String generateToken(Long userId, Role role, TokenType type) {
         Date now = new Date();
         return Jwts.builder()

@@ -7,7 +7,6 @@ import com.example.zukbambe.domain.auth.presentation.dto.request.SignInRequest;
 import com.example.zukbambe.domain.auth.presentation.dto.response.TokenResponse;
 import com.example.zukbambe.domain.user.domain.User;
 import com.example.zukbambe.domain.user.domain.repository.UserRepository;
-import com.example.zukbambe.global.security.jwt.JwtProperties;
 import com.example.zukbambe.global.security.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,7 +18,6 @@ public class SignInService {
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtProvider jwtProvider;
-    private final JwtProperties jwtProperties;
     private final PasswordEncoder passwordEncoder;
 
     public TokenResponse execute(SignInRequest request) {
@@ -37,7 +35,7 @@ public class SignInService {
             RefreshToken.builder()
                 .userId(user.getUserId())
                 .token(refreshToken)
-                .ttl(jwtProperties.refreshExp())
+                .ttl(jwtProvider.getRefreshExp())
                 .build()
         );
 
