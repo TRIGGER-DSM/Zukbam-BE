@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
-@RequestMapping("/auths")
+@RequestMapping("/auth")
 @RestController
 public class AuthController {
     private final SignInService signInService;
 
-    @PostMapping("/sign-up")
-    public TokenResponse signup(@Valid @RequestBody SignInRequest signInRequest){
+    @PostMapping("/sign-in")
+    public TokenResponse signIn(@Valid @RequestBody SignInRequest signInRequest) {
         return signInService.execute(signInRequest);
     }
 }
