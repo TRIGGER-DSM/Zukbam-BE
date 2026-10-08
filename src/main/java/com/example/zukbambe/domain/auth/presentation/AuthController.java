@@ -3,6 +3,7 @@ package com.example.zukbambe.domain.auth.presentation;
 import com.example.zukbambe.domain.auth.presentation.dto.request.SendEmailVerificationRequest;
 import com.example.zukbambe.domain.auth.presentation.dto.request.SignInRequest;
 import com.example.zukbambe.domain.auth.presentation.dto.request.StudentSignUpRequest;
+import com.example.zukbambe.domain.auth.presentation.dto.request.TeacherSignUpRequest;
 import com.example.zukbambe.domain.auth.presentation.dto.request.VerifyEmailRequest;
 import com.example.zukbambe.domain.auth.presentation.dto.response.EmailVerificationResponse;
 import com.example.zukbambe.domain.auth.presentation.dto.response.EmailVerifiedTokenResponse;
@@ -10,6 +11,7 @@ import com.example.zukbambe.domain.auth.presentation.dto.response.TokenResponse;
 import com.example.zukbambe.domain.auth.service.SendEmailVerificationService;
 import com.example.zukbambe.domain.auth.service.SignInService;
 import com.example.zukbambe.domain.auth.service.StudentSignUpService;
+import com.example.zukbambe.domain.auth.service.TeacherSignUpService;
 import com.example.zukbambe.domain.auth.service.VerifyEmailService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ public class AuthController {
     private final SendEmailVerificationService sendEmailVerificationService;
     private final VerifyEmailService verifyEmailService;
     private final StudentSignUpService studentSignUpService;
+    private final TeacherSignUpService teacherSignUpService;
 
     @PostMapping("/sign-in")
     public TokenResponse signIn(@Valid @RequestBody SignInRequest signInRequest) {
@@ -48,5 +51,10 @@ public class AuthController {
     @PostMapping("/sign-up")
     public TokenResponse studentSignUp(@Valid @RequestBody StudentSignUpRequest request) {
         return studentSignUpService.execute(request);
+    }
+
+    @PostMapping("/sign-up/admin")
+    public TokenResponse teacherSignUp(@Valid @RequestBody TeacherSignUpRequest request) {
+        return teacherSignUpService.execute(request);
     }
 }

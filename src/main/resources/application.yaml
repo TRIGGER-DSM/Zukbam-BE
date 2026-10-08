@@ -49,3 +49,5 @@ jwt:
 auth:
   email:
     verified-token-exp: ${AUTH_EMAIL_VERIFIED_TOKEN_EXP:1800}
+  teacher:
+    code: ${AUTH_TEACHER_CODE:}
