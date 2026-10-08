@@ -19,8 +19,10 @@ public class StreakFacade {
 
     @Transactional
     public void recordSolved(User user) {
-        Streak streak = streakRepository.findById(user.getUserId())
-            .orElseGet(() -> streakRepository.save(Streak.of(user)));
+        // row를 먼저 보장한 뒤 잠그고 읽어, 같은 유저의 동시 갱신을 순서대로 처리한다
+        streakRepository.insertIfAbsent(user.getUserId());
+        Streak streak = streakRepository.findWithLockByUserId(user.getUserId())
+            .orElseThrow();
 
         streak.recordSolved(LocalDate.now(clock));
     }

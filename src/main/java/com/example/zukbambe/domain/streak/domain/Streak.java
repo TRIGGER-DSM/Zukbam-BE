@@ -32,12 +32,6 @@ public class Streak {
     @Column(name = "last_solved_date")
     private LocalDate lastSolvedDate;
 
-    public static Streak of(User user) {
-        return Streak.builder()
-                .user(user)
-                .build();
-    }
-
     public void recordSolved(LocalDate today) {
         // 같은 날 여러 문제를 풀어도 스트릭은 하루에 한 번만 오른다
         if (lastSolvedDate != null && !lastSolvedDate.isBefore(today)) {
