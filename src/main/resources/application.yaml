@@ -45,3 +45,7 @@ jwt:
   secret: ${JWT_SECRET}
   access-exp: ${JWT_ACCESS_EXP:3600}
   refresh-exp: ${JWT_REFRESH_EXP:1209600}
+
+auth:
+  email:
+    verified-token-exp: ${AUTH_EMAIL_VERIFIED_TOKEN_EXP:1800}
