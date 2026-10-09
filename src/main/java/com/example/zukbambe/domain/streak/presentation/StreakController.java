@@ -2,12 +2,12 @@ package com.example.zukbambe.domain.streak.presentation;
 
 import com.example.zukbambe.domain.streak.presentation.dto.response.GrassResponse;
 import com.example.zukbambe.domain.streak.presentation.dto.response.StreakResponse;
-import com.example.zukbambe.domain.streak.service.QueryMyGrassService;
-import com.example.zukbambe.domain.streak.service.QueryMyStreakService;
-import com.example.zukbambe.domain.streak.service.QueryUserGrassService;
-import com.example.zukbambe.domain.streak.service.QueryUserStreakService;
+import com.example.zukbambe.domain.streak.service.QueryGrassService;
+import com.example.zukbambe.domain.streak.service.QueryStreakService;
+import com.example.zukbambe.global.security.auth.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,27 +21,26 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class StreakController {
 
-    private final QueryMyStreakService queryMyStreakService;
-    private final QueryMyGrassService queryMyGrassService;
-    private final QueryUserStreakService queryUserStreakService;
-    private final QueryUserGrassService queryUserGrassService;
+    private final QueryStreakService queryStreakService;
+    private final QueryGrassService queryGrassService;
 
     @GetMapping("/me")
-    public StreakResponse getMyStreak() {
-        return queryMyStreakService.execute();
+    public StreakResponse getMyStreak(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return queryStreakService.execute(userDetails.userId());
     }
 
     @GetMapping("/me/grass")
     public GrassResponse getMyGrass(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
     ) {
-        return queryMyGrassService.execute(from, to);
+        return queryGrassService.execute(userDetails.userId(), from, to);
     }
 
     @GetMapping("/{userId}")
     public StreakResponse getUserStreak(@PathVariable Long userId) {
-        return queryUserStreakService.execute(userId);
+        return queryStreakService.execute(userId);
     }
 
     @GetMapping("/{userId}/grass")
@@ -50,6 +49,6 @@ public class StreakController {
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
     ) {
-        return queryUserGrassService.execute(userId, from, to);
+        return queryGrassService.execute(userId, from, to);
     }
 }

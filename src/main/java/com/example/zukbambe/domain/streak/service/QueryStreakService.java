@@ -12,7 +12,7 @@ import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
-public class QueryUserStreakService {
+public class QueryStreakService {
 
     private final UserFacade userFacade;
     private final StreakRepository streakRepository;
