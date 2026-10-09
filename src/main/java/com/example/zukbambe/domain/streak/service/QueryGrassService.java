@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class QueryUserGrassService {
+public class QueryGrassService {
 
     private final UserFacade userFacade;
     private final SolvedHistoryRepository solvedHistoryRepository;
@@ -29,7 +29,7 @@ public class QueryUserGrassService {
         LocalDate end = to != null ? to : LocalDate.now(clock);
         LocalDate start = from != null ? from : end.minusYears(1).plusDays(1);
 
-        if (start.isAfter(end) || start.isBefore(end.minusYears(1))) {
+        if (start.isAfter(end) || start.isBefore(end.minusYears(1).plusDays(1))) {
             throw new InvalidGrassPeriodException();
         }
 
