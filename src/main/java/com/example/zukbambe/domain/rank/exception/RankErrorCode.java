@@ -1,4 +1,4 @@
-package com.example.zukbambe.domain.user.exception;
+package com.example.zukbambe.domain.rank.exception;
 
 import com.example.zukbambe.global.error.exception.ErrorProperty;
 import lombok.AllArgsConstructor;
@@ -7,9 +7,8 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 @AllArgsConstructor
-public enum UserErrorCode implements ErrorProperty {
-    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "U001", "유저를 찾을 수 없습니다."),
-    USER_ALREADY_EXISTS(HttpStatus.CONFLICT, "U002", "이미 가입된 이메일입니다.");
+public enum RankErrorCode implements ErrorProperty {
+    USER_RANK_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "R001", "기본 랭크가 존재하지 않습니다.");
 
     private final HttpStatus status;
     private final String code;

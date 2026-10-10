@@ -13,6 +13,9 @@ services:
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      MAIL_USERNAME: ${MAIL_USERNAME:?MAIL_USERNAME is required}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:?MAIL_PASSWORD is required}
+      AUTH_TEACHER_CODE: ${AUTH_TEACHER_CODE:?AUTH_TEACHER_CODE is required}
     depends_on:
       db:
         condition: service_healthy
