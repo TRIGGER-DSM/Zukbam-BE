@@ -33,6 +33,9 @@ jobs:
           JPA_DDL_AUTO: update
           REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          AUTH_TEACHER_CODE: ${{ secrets.AUTH_TEACHER_CODE }}
         run: |
           export APP_IMAGE=ghcr.io/$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]'):latest
           docker compose -p zukbam pull backend

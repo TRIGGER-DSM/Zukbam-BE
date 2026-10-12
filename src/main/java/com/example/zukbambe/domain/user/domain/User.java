@@ -43,7 +43,7 @@ public class User {
     @Column(nullable = false, name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Column(columnDefinition = "CHAR(15)", nullable = false, name = "phone_number")
+    @Column(columnDefinition = "CHAR(15)", name = "phone_number")
     private String phoneNumber;
 
     @Builder.Default
