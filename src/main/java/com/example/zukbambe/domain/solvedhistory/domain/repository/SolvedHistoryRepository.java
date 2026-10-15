@@ -11,6 +11,8 @@ import java.util.List;
 
 public interface SolvedHistoryRepository extends JpaRepository<SolvedHistory, SolvedHistoryId> {
 
+    long countByIdUserId(Long userId);
+
     @Query("""
         select s.solvedDate
         from SolvedHistory s
