@@ -1,10 +1,9 @@
 package com.example.zukbambe.domain.user.presentation;
 
 import com.example.zukbambe.domain.user.presentation.dto.response.UserProfileResponse;
+import com.example.zukbambe.domain.user.service.QueryMyProfileService;
 import com.example.zukbambe.domain.user.service.QueryUserProfileService;
-import com.example.zukbambe.global.security.auth.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,11 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class UserController {
 
+    private final QueryMyProfileService queryMyProfileService;
     private final QueryUserProfileService queryUserProfileService;
 
     @GetMapping("/me")
-    public UserProfileResponse getMyProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        return queryUserProfileService.execute(userDetails.userId());
+    public UserProfileResponse getMyProfile() {
+        return queryMyProfileService.execute();
     }
 
     @GetMapping("/{userId}")
