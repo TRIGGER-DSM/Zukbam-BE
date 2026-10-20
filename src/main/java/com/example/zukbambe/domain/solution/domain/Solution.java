@@ -6,6 +6,10 @@ import com.example.zukbambe.domain.solution.domain.enums.Status;
 import com.example.zukbambe.domain.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.LocalDateTime;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -13,6 +17,7 @@ import lombok.*;
 @Builder
 @Getter
 @Table(name = "tbl_solutions")
+@EntityListeners(AuditingEntityListener.class)
 public class Solution {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,11 +35,11 @@ public class Solution {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    @Column(nullable = false, name = "memory_used")
+    @Column(name = "memory_used")
     private Long memoryUsed;
 
-    @Column(nullable = false, name = "time")
-    private Long time;
+    @Column(name = "time")
+    private Double time;
 
     @Column(columnDefinition = "TEXT", nullable = false, name = "code")
     private String code;
@@ -43,4 +48,17 @@ public class Solution {
     @Enumerated(EnumType.STRING)
     private Language language;
 
+    @CreatedDate
+    @Column(nullable = false, updatable = false, name = "submitted_at")
+    private LocalDateTime submittedAt;
+
+    public static Solution of(User user, Problem problem, Language language, String code) {
+        return Solution.builder()
+            .user(user)
+            .problem(problem)
+            .status(Status.PENDING)
+            .language(language)
+            .code(code)
+            .build();
+    }
 }
