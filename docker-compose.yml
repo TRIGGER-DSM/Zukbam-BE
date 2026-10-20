@@ -16,11 +16,14 @@ services:
       MAIL_USERNAME: ${MAIL_USERNAME:?MAIL_USERNAME is required}
       MAIL_PASSWORD: ${MAIL_PASSWORD:?MAIL_PASSWORD is required}
       AUTH_TEACHER_CODE: ${AUTH_TEACHER_CODE:?AUTH_TEACHER_CODE is required}
+      JUDGE0_URL: http://judge0-server:2358
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
+      judge0-server:
+        condition: service_started
 
   db:
     image: postgres:16
@@ -51,6 +54,61 @@ services:
       timeout: 5s
       retries: 10
 
+  # Judge0 API에는 인증이 없으므로 ports를 열지 않고 compose 내부망에서만 쓴다
+  judge0-server:
+    image: judge0/judge0:1.13.1
+    restart: unless-stopped
+    privileged: true
+    environment: &judge0-env
+      REDIS_HOST: judge0-redis
+      REDIS_PASSWORD: ${JUDGE0_REDIS_PASSWORD:?JUDGE0_REDIS_PASSWORD is required}
+      POSTGRES_HOST: judge0-db
+      POSTGRES_DB: judge0
+      POSTGRES_USER: judge0
+      POSTGRES_PASSWORD: ${JUDGE0_DB_PASSWORD:?JUDGE0_DB_PASSWORD is required}
+      MAX_QUEUE_SIZE: 1000
+    depends_on: &judge0-depends
+      judge0-db:
+        condition: service_healthy
+      judge0-redis:
+        condition: service_healthy
+
+  judge0-workers:
+    image: judge0/judge0:1.13.1
+    command: ["./scripts/workers"]
+    restart: unless-stopped
+    privileged: true
+    environment: *judge0-env
+    depends_on: *judge0-depends
+
+  judge0-db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: judge0
+      POSTGRES_USER: judge0
+      POSTGRES_PASSWORD: ${JUDGE0_DB_PASSWORD:?JUDGE0_DB_PASSWORD is required}
+    volumes:
+      - judge0-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U judge0 -d judge0"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  judge0-redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${JUDGE0_REDIS_PASSWORD:?JUDGE0_REDIS_PASSWORD is required}
+    command: ["sh", "-c", "exec redis-server --requirepass \"$$REDIS_PASSWORD\" --appendonly no"]
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" --no-auth-warning ping | grep PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
 volumes:
   pgdata:
   redisdata:
+  judge0-pgdata:

@@ -36,6 +36,8 @@ jobs:
           MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
           MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
           AUTH_TEACHER_CODE: ${{ secrets.AUTH_TEACHER_CODE }}
+          JUDGE0_DB_PASSWORD: ${{ secrets.JUDGE0_DB_PASSWORD }}
+          JUDGE0_REDIS_PASSWORD: ${{ secrets.JUDGE0_REDIS_PASSWORD }}
         run: |
           export APP_IMAGE=ghcr.io/$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]'):latest
           docker compose -p zukbam pull backend
