@@ -34,8 +34,6 @@ public class Judge0JudgeProvider implements JudgeProvider {
 
     // Judge0 batch 요청 한 번에 보낼 수 있는 최대 개수 (MAX_SUBMISSION_BATCH_SIZE 기본값)
     private static final int BATCH_SIZE = 20;
-    // status id 1(In Queue), 2(Processing)까지는 아직 채점 중
-    private static final int PROCESSING = 2;
 
     private final RestClient judge0RestClient;
     private final Judge0Properties judge0Properties;
@@ -95,7 +93,7 @@ public class Judge0JudgeProvider implements JudgeProvider {
             List<String> pending = tokens.stream().filter(token -> !finished.containsKey(token)).toList();
             for (List<String> chunk : chunk(pending)) {
                 fetch(chunk).stream()
-                    .filter(submission -> submission.status().id() > PROCESSING)
+                    .filter(submission -> Judge0Status.from(submission.status().id()).isFinished())
                     .forEach(submission -> finished.put(submission.token(), submission));
             }
 
@@ -124,7 +122,7 @@ public class Judge0JudgeProvider implements JudgeProvider {
 
     private JudgeResult aggregate(List<Judge0SubmissionResponse> results) {
         JudgeStatus status = results.stream()
-            .map(result -> toStatus(result.status().id()))
+            .map(result -> Judge0Status.from(result.status().id()).getJudgeStatus())
             .filter(judgeStatus -> judgeStatus != JudgeStatus.ACCEPTED)
             .findFirst()
             .orElse(JudgeStatus.ACCEPTED);
@@ -143,17 +141,6 @@ public class Judge0JudgeProvider implements JudgeProvider {
             .orElse(null);
 
         return new JudgeResult(status, time, memory);
-    }
-
-    private JudgeStatus toStatus(int statusId) {
-        return switch (statusId) {
-            case 3 -> JudgeStatus.ACCEPTED;
-            case 4 -> JudgeStatus.WRONG_ANSWER;
-            case 5 -> JudgeStatus.TIME_LIMIT_EXCEEDED;
-            case 6 -> JudgeStatus.COMPILE_ERROR;
-            case 7, 8, 9, 10, 11, 12 -> JudgeStatus.RUNTIME_ERROR;
-            default -> JudgeStatus.INTERNAL_ERROR;
-        };
     }
 
     private String encode(String value) {
