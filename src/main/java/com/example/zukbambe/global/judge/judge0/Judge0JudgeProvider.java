@@ -5,6 +5,8 @@ import com.example.zukbambe.global.judge.dto.JudgeCase;
 import com.example.zukbambe.global.judge.dto.JudgeRequest;
 import com.example.zukbambe.global.judge.dto.JudgeResult;
 import com.example.zukbambe.global.judge.enums.JudgeStatus;
+import com.example.zukbambe.global.judge.exception.JudgeFetchFailedException;
+import com.example.zukbambe.global.judge.exception.JudgeSubmitFailedException;
 import com.example.zukbambe.global.judge.exception.JudgeTimeoutException;
 import com.example.zukbambe.global.judge.judge0.dto.request.Judge0BatchRequest;
 import com.example.zukbambe.global.judge.judge0.dto.response.Judge0BatchResponse;
@@ -62,7 +64,7 @@ public class Judge0JudgeProvider implements JudgeProvider {
             // 형식이 잘못된 submission은 token 대신 에러 내용이 온다
             if (response == null || response.size() != chunk.size()
                 || response.stream().anyMatch(token -> token.token() == null)) {
-                throw new IllegalStateException("Judge0 제출에 실패했습니다: " + response);
+                throw new JudgeSubmitFailedException(response);
             }
             response.forEach(token -> tokens.add(token.token()));
         }
@@ -115,7 +117,7 @@ public class Judge0JudgeProvider implements JudgeProvider {
             .body(Judge0BatchResponse.class);
 
         if (response == null || response.submissions() == null) {
-            throw new IllegalStateException("Judge0 결과 조회에 실패했습니다.");
+            throw new JudgeFetchFailedException();
         }
         return response.submissions();
     }
@@ -166,7 +168,7 @@ public class Judge0JudgeProvider implements JudgeProvider {
             Thread.sleep(duration);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new IllegalStateException("채점 대기 중 인터럽트되었습니다.", e);
+            throw new JudgeTimeoutException();
         }
     }
 

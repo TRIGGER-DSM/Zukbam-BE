@@ -5,6 +5,7 @@ import com.example.zukbambe.global.judge.dto.JudgeRequest;
 import com.example.zukbambe.global.judge.dto.JudgeResult;
 import com.example.zukbambe.global.judge.enums.JudgeLanguage;
 import com.example.zukbambe.global.judge.enums.JudgeStatus;
+import com.example.zukbambe.global.judge.exception.JudgeSubmitFailedException;
 import com.example.zukbambe.global.judge.exception.JudgeTimeoutException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -135,7 +136,7 @@ class Judge0JudgeProviderTest {
             .andRespond(json("[{\"language_id\":[\"language with id 999 doesn't exist\"]}]"));
 
         assertThatThrownBy(() -> judge0JudgeProvider.judge(request(JudgeLanguage.PYTHON, 1)))
-            .isInstanceOf(IllegalStateException.class);
+            .isInstanceOf(JudgeSubmitFailedException.class);
     }
 
     @Test
