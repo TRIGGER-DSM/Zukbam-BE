@@ -1,4 +1,4 @@
-package com.example.zukbambe.global.judge.judge0.dto;
+package com.example.zukbambe.global.judge.judge0.dto.request;
 
 import java.util.List;
 

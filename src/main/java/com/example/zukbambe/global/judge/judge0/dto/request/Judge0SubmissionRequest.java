@@ -1,4 +1,4 @@
-package com.example.zukbambe.global.judge.judge0.dto;
+package com.example.zukbambe.global.judge.judge0.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
