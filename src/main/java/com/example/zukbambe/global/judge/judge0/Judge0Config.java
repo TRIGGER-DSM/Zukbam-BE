@@ -15,7 +15,6 @@ public class Judge0Config {
         requestFactory.setConnectTimeout(judge0Properties.requestTimeout());
         requestFactory.setReadTimeout(judge0Properties.requestTimeout());
 
-        // Judge0는 chunked로 온 body를 읽지 못해서, 버퍼링해 Content-Length로 보낸다
         return RestClient.builder()
             .baseUrl(judge0Properties.url())
             .requestFactory(new BufferingClientHttpRequestFactory(requestFactory))

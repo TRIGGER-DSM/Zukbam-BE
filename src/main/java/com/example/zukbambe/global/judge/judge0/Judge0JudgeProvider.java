@@ -59,7 +59,7 @@ public class Judge0JudgeProvider implements JudgeProvider {
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {});
 
-            // 형식이 잘못된 submission은 token 대신 에러 내용이 온다
+            // 형식이 잘못된 제출은 error가 응답으로 전달됨
             if (response == null || response.size() != chunk.size()
                 || response.stream().anyMatch(token -> token.token() == null)) {
                 throw new JudgeSubmitFailedException(response);
@@ -81,7 +81,7 @@ public class Judge0JudgeProvider implements JudgeProvider {
         );
     }
 
-    // 끝난 테스트케이스가 idleTimeout 동안 하나도 늘지 않으면 Judge0가 멈춘 것으로 본다
+    // 끝난 테스트케이스가 idleTimeout 동안 하나도 늘지 않음을 Judge0가 멈춘 것으로 간주
     private Map<String, Judge0SubmissionResponse> poll(List<String> tokens) {
         Map<String, Judge0SubmissionResponse> finished = new HashMap<>();
         long lastProgress = System.nanoTime();
@@ -108,7 +108,6 @@ public class Judge0JudgeProvider implements JudgeProvider {
 
     private List<Judge0SubmissionResponse> fetch(List<String> tokens) {
         Judge0BatchResponse response = judge0RestClient.get()
-            // token은 UUID라 그대로 넣는다. 템플릿 변수로 넣으면 쉼표가 %2C로 인코딩된다
             .uri("/submissions/batch?tokens=" + String.join(",", tokens)
                 + "&base64_encoded=true&fields=token,status,time,memory")
             .retrieve()
