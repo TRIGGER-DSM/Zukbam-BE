@@ -61,4 +61,10 @@ public class Solution {
             .code(code)
             .build();
     }
+
+    public void grade(Status status, Double time, Long memoryUsed) {
+        this.status = status;
+        this.time = time;
+        this.memoryUsed = memoryUsed;
+    }
 }
