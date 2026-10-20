@@ -24,7 +24,7 @@ public record ProblemRequest(
 
     @NotNull(message = "시간 제한은 필수입니다.")
     @Positive(message = "시간 제한은 양수여야 합니다.")
-    Long timeLimit,
+    Double timeLimit,
 
     @NotNull(message = "난이도는 필수입니다.")
     ProblemRank rank,

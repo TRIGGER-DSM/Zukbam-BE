@@ -25,13 +25,13 @@ public class Problem {
     private Long memoryLimit;
 
     @Column(nullable = false, name = "time_limit")
-    private Long timeLimit;
+    private Double timeLimit;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, name = "problem_rank")
     private ProblemRank rank;
 
-    public void update(String title, String content, Long memoryLimit, Long timeLimit, ProblemRank rank) {
+    public void update(String title, String content, Long memoryLimit, Double timeLimit, ProblemRank rank) {
         this.title = title;
         this.content = content;
         this.memoryLimit = memoryLimit;
