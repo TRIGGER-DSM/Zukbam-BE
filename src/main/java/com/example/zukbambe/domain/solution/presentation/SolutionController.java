@@ -2,6 +2,8 @@ package com.example.zukbambe.domain.solution.presentation;
 
 import com.example.zukbambe.domain.solution.presentation.dto.request.SubmitSolutionRequest;
 import com.example.zukbambe.domain.solution.presentation.dto.response.SolutionListResponse;
+import com.example.zukbambe.domain.solution.presentation.dto.response.SolutionResponse;
+import com.example.zukbambe.domain.solution.service.QuerySolutionDetailService;
 import com.example.zukbambe.domain.solution.service.QuerySolutionListService;
 import com.example.zukbambe.domain.solution.service.SubmitSolutionService;
 import jakarta.validation.Valid;
@@ -26,13 +28,15 @@ public class SolutionController {
 
     private final SubmitSolutionService submitSolutionService;
     private final QuerySolutionListService querySolutionListService;
+    private final QuerySolutionDetailService querySolutionDetailService;
 
     @PostMapping("/{problemId}")
     public ResponseEntity<Void> submitSolution(
         @PathVariable Long problemId,
         @RequestBody @Valid SubmitSolutionRequest request
     ) {
-        URI location = submitSolutionService.execute(problemId, request);
+        Long solutionId = submitSolutionService.execute(problemId, request);
+        URI location = URI.create("/solutions/" + solutionId);
         return ResponseEntity.created(location).build();
     }
 
@@ -44,5 +48,10 @@ public class SolutionController {
         @RequestParam(required = false) String email
     ) {
         return querySolutionListService.execute(page, size, problemId, email);
+    }
+
+    @GetMapping("/{solutionId}")
+    public SolutionResponse getSolution(@PathVariable Long solutionId) {
+        return querySolutionDetailService.execute(solutionId);
     }
 }

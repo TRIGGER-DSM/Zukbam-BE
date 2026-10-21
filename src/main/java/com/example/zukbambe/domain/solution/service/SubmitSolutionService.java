@@ -12,9 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.util.UriComponentsBuilder;
-
-import java.net.URI;
 
 @Service
 @RequiredArgsConstructor
@@ -26,18 +23,13 @@ public class SubmitSolutionService {
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
-    public URI execute(Long problemId, SubmitSolutionRequest request) {
+    public Long execute(Long problemId, SubmitSolutionRequest request) {
         User user = userFacade.getCurrentUser();
         Problem problem = problemFacade.getProblemById(problemId);
 
         Solution solution = solutionRepository.save(Solution.of(user, problem, request.language(), request.code()));
         eventPublisher.publishEvent(new SolutionSubmittedEvent(solution.getSolutionId()));
 
-        return UriComponentsBuilder.fromPath("/solutions")
-            .queryParam("problemId", problemId)
-            .queryParam("email", "{email}")
-            .encode()
-            .buildAndExpand(user.getEmail())
-            .toUri();
+        return solution.getSolutionId();
     }
 }
