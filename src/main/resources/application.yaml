@@ -62,3 +62,9 @@ auth:
     verified-token-exp: ${AUTH_EMAIL_VERIFIED_TOKEN_EXP:1800}
   teacher:
     code: ${AUTH_TEACHER_CODE:}
+
+judge0:
+  url: ${JUDGE0_URL:http://localhost:2358}
+  poll-interval: ${JUDGE0_POLL_INTERVAL:1s}
+  request-timeout: ${JUDGE0_REQUEST_TIMEOUT:5s}
+  idle-timeout: ${JUDGE0_IDLE_TIMEOUT:2m}
