@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "Auth", description = "인증 API")
+@Tag(name = "Auth")
 @SecurityRequirements
 @RequiredArgsConstructor
 @RequestMapping("/auth")
@@ -37,32 +37,32 @@ public class AuthController {
     private final StudentSignUpService studentSignUpService;
     private final TeacherSignUpService teacherSignUpService;
 
-    @Operation(summary = "로그인", description = "에러: C001(400), A001(401)")
+    @Operation(summary = "로그인")
     @PostMapping("/sign-in")
     public TokenResponse signIn(@Valid @RequestBody SignInRequest signInRequest) {
         return signInService.execute(signInRequest);
     }
 
-    @Operation(summary = "이메일 인증 코드 발송", description = "인증 코드는 3분간 유효하다. 에러: C001(400)")
+    @Operation(summary = "이메일 인증 코드 발송", description = "인증 코드는 3분간 유효하다.")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/email-verifications")
     public EmailVerificationResponse sendEmailVerification(@Valid @RequestBody SendEmailVerificationRequest request) {
         return sendEmailVerificationService.execute(request);
     }
 
-    @Operation(summary = "이메일 인증 코드 확인", description = "회원가입에 사용할 이메일 인증 토큰을 발급한다. 에러: C001(400), A002(400), A003(400)")
+    @Operation(summary = "이메일 인증 코드 확인", description = "회원가입에 사용할 이메일 인증 토큰을 발급한다.")
     @PostMapping("/email-verifications/verify")
     public EmailVerifiedTokenResponse verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
         return verifyEmailService.execute(request);
     }
 
-    @Operation(summary = "학생 회원가입", description = "에러: C001(400), A004(400), U002(409)")
+    @Operation(summary = "학생 회원가입")
     @PostMapping("/sign-up")
     public TokenResponse studentSignUp(@Valid @RequestBody StudentSignUpRequest request) {
         return studentSignUpService.execute(request);
     }
 
-    @Operation(summary = "선생님 회원가입", description = "에러: C001(400), A004(400), A005(400), U002(409)")
+    @Operation(summary = "선생님 회원가입")
     @PostMapping("/sign-up/admin")
     public TokenResponse teacherSignUp(@Valid @RequestBody TeacherSignUpRequest request) {
         return teacherSignUpService.execute(request);

@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
 
-@Tag(name = "Problem", description = "문제 API")
+@Tag(name = "Problem")
 @RestController
 @RequestMapping("/problems")
 @RequiredArgsConstructor
@@ -42,7 +42,7 @@ public class ProblemController {
     private final UpdateProblemService updateProblemService;
     private final DeleteProblemService deleteProblemService;
 
-    @Operation(summary = "문제 생성", description = "TEACHER 권한 필요. 생성된 문제 경로는 Location 헤더로 반환한다. 에러: C001(400), S004(403), P002(409)")
+    @Operation(summary = "문제 생성", description = "TEACHER 권한 필요. 생성된 문제 경로는 Location 헤더로 반환한다.")
     @ApiResponse(responseCode = "201")
     @PostMapping
     public ResponseEntity<Void> createProblem(@RequestBody @Valid ProblemRequest request) {
@@ -51,7 +51,7 @@ public class ProblemController {
         return ResponseEntity.created(location).build();
     }
 
-    @Operation(summary = "문제 목록 조회", description = "에러: C001(400)")
+    @Operation(summary = "문제 목록 조회")
     @GetMapping
     public ProblemListResponse getProblems(
         @RequestParam(defaultValue = "0") @Min(0) int page,
@@ -60,13 +60,13 @@ public class ProblemController {
         return queryProblemListService.execute(page, size);
     }
 
-    @Operation(summary = "문제 상세 조회", description = "에러: P001(404)")
+    @Operation(summary = "문제 상세 조회")
     @GetMapping("/{problemId}")
     public ProblemDetailResponse getProblem(@PathVariable Long problemId) {
         return queryProblemDetailService.execute(problemId);
     }
 
-    @Operation(summary = "문제 수정", description = "TEACHER 권한 필요. 에러: C001(400), S004(403), P001(404), P002(409)")
+    @Operation(summary = "문제 수정", description = "TEACHER 권한 필요.")
     @PutMapping("/{problemId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateProblem(
@@ -76,7 +76,7 @@ public class ProblemController {
         updateProblemService.execute(problemId, request);
     }
 
-    @Operation(summary = "문제 삭제", description = "TEACHER 권한 필요. 에러: S004(403), P001(404)")
+    @Operation(summary = "문제 삭제", description = "TEACHER 권한 필요.")
     @DeleteMapping("/{problemId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteProblem(@PathVariable Long problemId) {
