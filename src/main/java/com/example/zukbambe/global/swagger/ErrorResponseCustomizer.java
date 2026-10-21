@@ -3,11 +3,9 @@ package com.example.zukbambe.global.swagger;
 import com.example.zukbambe.global.error.exception.ErrorProperty;
 import com.example.zukbambe.global.error.exception.GlobalErrorCode;
 import com.example.zukbambe.global.error.response.ErrorResponse;
-import com.example.zukbambe.global.security.jwt.exception.SecurityErrorCode;
 import io.swagger.v3.core.converter.AnnotatedType;
 import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.core.converter.ResolvedSchema;
-import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.media.Content;
@@ -17,12 +15,19 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.customizers.GlobalOperationCustomizer;
-import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.method.HandlerMethod;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -36,10 +41,13 @@ public class ErrorResponseCustomizer implements GlobalOperationCustomizer {
     private static final String JSON = "application/json";
     private static final String EXAMPLE_TIMESTAMP = "2026-01-01T12:00:00";
 
-    private static final List<ErrorProperty> AUTH_ERROR_CODES = List.of(
-        SecurityErrorCode.UNAUTHORIZED,
-        SecurityErrorCode.INVALID_TOKEN,
-        SecurityErrorCode.EXPIRED_TOKEN
+    private static final List<Class<? extends Annotation>> REQUEST_INPUT_ANNOTATIONS = List.of(
+        RequestBody.class,
+        RequestParam.class,
+        PathVariable.class,
+        RequestHeader.class,
+        RequestPart.class,
+        ModelAttribute.class
     );
 
     private static final List<ErrorProperty> COMMON_ERROR_CODES = List.of(
@@ -48,14 +56,16 @@ public class ErrorResponseCustomizer implements GlobalOperationCustomizer {
     );
 
     private final ThrownErrorCodeResolver thrownErrorCodeResolver;
+    private final SecurityErrorCodeResolver securityErrorCodeResolver;
 
     @Override
     public Operation customize(Operation operation, HandlerMethod handlerMethod) {
         Set<ErrorProperty> errorCodes = new LinkedHashSet<>();
-        errorCodes.addAll(thrownErrorCodeResolver.resolve(handlerMethod.getMethod()));
-        if (requiresAuth(handlerMethod)) {
-            errorCodes.addAll(AUTH_ERROR_CODES);
+        if (hasRequestInput(handlerMethod)) {
+            errorCodes.add(GlobalErrorCode.INVALID_INPUT);
         }
+        errorCodes.addAll(securityErrorCodeResolver.resolve(handlerMethod));
+        errorCodes.addAll(thrownErrorCodeResolver.resolve(handlerMethod.getMethod()));
         errorCodes.addAll(COMMON_ERROR_CODES);
 
         Map<Integer, List<ErrorProperty>> byStatus = new TreeMap<>();
@@ -87,12 +97,10 @@ public class ErrorResponseCustomizer implements GlobalOperationCustomizer {
         return operation;
     }
 
-    private boolean requiresAuth(HandlerMethod handlerMethod) {
-        SecurityRequirements requirements = handlerMethod.getMethodAnnotation(SecurityRequirements.class);
-        if (requirements == null) {
-            requirements = AnnotatedElementUtils.findMergedAnnotation(handlerMethod.getBeanType(), SecurityRequirements.class);
-        }
-        return requirements == null || requirements.value().length > 0;
+    // 요청 값 바인딩·검증이 실패하면 GlobalExceptionHandler 가 INVALID_INPUT 으로 응답한다
+    private boolean hasRequestInput(HandlerMethod handlerMethod) {
+        return Arrays.stream(handlerMethod.getMethodParameters())
+            .anyMatch(parameter -> REQUEST_INPUT_ANNOTATIONS.stream().anyMatch(parameter::hasParameterAnnotation));
     }
 
     private ApiResponse buildErrorResponse(int status, List<ErrorProperty> codes) {
