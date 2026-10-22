@@ -9,6 +9,7 @@ import com.example.zukbambe.domain.solution.domain.Solution;
 import com.example.zukbambe.domain.solution.domain.enums.Language;
 import com.example.zukbambe.domain.solution.domain.enums.Status;
 import com.example.zukbambe.domain.solution.domain.repository.SolutionRepository;
+import com.example.zukbambe.domain.solution.exception.TooManySubmissionsException;
 import com.example.zukbambe.domain.solution.presentation.dto.request.SubmitSolutionRequest;
 import com.example.zukbambe.domain.solvedhistory.domain.SolvedHistoryId;
 import com.example.zukbambe.domain.solvedhistory.domain.repository.SolvedHistoryRepository;
@@ -39,6 +40,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
@@ -144,6 +146,19 @@ class GradeSolutionFlowTest {
         assertThat(solution.getStatus()).isEqualTo(Status.INTERNAL_ERROR);
         assertThat(solution.getTime()).isNull();
         assertThat(solution.getMemoryUsed()).isNull();
+    }
+
+    @Test
+    void 일분에_10번을_넘게_제출하면_거부한다() {
+        given(judgeProvider.judge(any())).willReturn(new JudgeResult(JudgeStatus.ACCEPTED, 0.012, 3000L));
+        SubmitSolutionRequest request = new SubmitSolutionRequest(Language.PYTHON, "code");
+
+        for (int i = 0; i < 10; i++) {
+            submitSolutionService.execute(problem.getProblemId(), request);
+        }
+
+        assertThatThrownBy(() -> submitSolutionService.execute(problem.getProblemId(), request))
+            .isInstanceOf(TooManySubmissionsException.class);
     }
 
     private Long submit(Language language) {
