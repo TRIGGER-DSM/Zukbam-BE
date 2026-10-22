@@ -1,5 +1,6 @@
 package com.example.zukbambe.domain.group.domain;
 
+import com.example.zukbambe.domain.group.domain.enums.GroupRole;
 import com.example.zukbambe.domain.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -31,18 +32,19 @@ public class GroupMember {
     private Group group;
 
     @CreatedDate
-    @Column(nullable = false, updatable = false, name = "join_date")
-    private LocalDateTime joinDate;
+    @Column(nullable = false, updatable = false, name = "joined_at")
+    private LocalDateTime joinedAt;
 
-    @Column(nullable = false, name = "is_host")
-    private Boolean isHost;
+    @Column(nullable = false, name = "role")
+    @Enumerated(EnumType.STRING)
+    private GroupRole role;
 
-    public static GroupMember of(User user, Group group, Boolean isHost) {
+    public static GroupMember of(User user, Group group, GroupRole role) {
         return GroupMember.builder()
                 .id(new GroupMemberId(user.getUserId(), group.getGroupId()))
                 .user(user)
                 .group(group)
-                .isHost(isHost)
+                .role(role)
                 .build();
     }
 }
