@@ -45,6 +45,17 @@ spring:
           timeout: 5000
           writetimeout: 5000
 
+springdoc:
+  api-docs:
+    enabled: ${SWAGGER_ENABLED:true}
+  swagger-ui:
+    enabled: ${SWAGGER_ENABLED:true}
+    tags-sorter: alpha
+    operations-sorter: method
+    persist-authorization: true
+  default-produces-media-type: application/json
+  override-with-generic-response: false
+
 jwt:
   header: ${JWT_HEADER:Authorization}
   prefix: ${JWT_PREFIX:Bearer }
