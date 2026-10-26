@@ -33,7 +33,7 @@ public class GroupInvitationController {
     private final RejectGroupInvitationService rejectGroupInvitationService;
     private final CancelGroupInvitationService cancelGroupInvitationService;
 
-    @Operation(summary = "그룹 초대 보내기", description = "그룹 멤버라면 누구나 초대할 수 있다. 초대는 7일간 유효하다.")
+    @Operation(summary = "그룹 초대 보내기", description = "초대는 7일간 유효하다.")
     @PostMapping("/{groupId}/invitations")
     @ResponseStatus(HttpStatus.CREATED)
     public void sendGroupInvitation(@PathVariable Long groupId, @RequestBody @Valid GroupInvitationRequest request) {

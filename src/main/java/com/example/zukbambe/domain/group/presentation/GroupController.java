@@ -47,7 +47,7 @@ public class GroupController {
     private final RemoveGroupMemberService removeGroupMemberService;
     private final TransferGroupOwnerService transferGroupOwnerService;
 
-    @Operation(summary = "그룹 생성", description = "생성한 유저가 그룹장이 된다. 생성된 그룹 경로는 Location 헤더로 반환한다.")
+    @Operation(summary = "그룹 생성", description = "생성된 그룹 경로는 Location 헤더로 반환한다.")
     @ApiResponse(responseCode = "201")
     @PostMapping
     public ResponseEntity<Void> createGroup(@RequestBody @Valid GroupRequest request) {
@@ -88,7 +88,7 @@ public class GroupController {
         transferGroupOwnerService.execute(groupId, request.newOwnerId());
     }
 
-    @Operation(summary = "그룹 탈퇴", description = "그룹장은 위임한 뒤 탈퇴할 수 있다.")
+    @Operation(summary = "그룹 탈퇴")
     @DeleteMapping("/{groupId}/members/me")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void leaveGroup(@PathVariable Long groupId) {
