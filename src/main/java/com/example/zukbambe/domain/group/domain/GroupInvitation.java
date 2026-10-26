@@ -54,4 +54,36 @@ public class GroupInvitation {
                 .expiresAt(expiresAt)
                 .build();
     }
+
+    public void accept() {
+        this.status = InvitationStatus.ACCEPTED;
+    }
+
+    public void reject() {
+        this.status = InvitationStatus.REJECTED;
+    }
+
+    public void cancel() {
+        this.status = InvitationStatus.CANCELED;
+    }
+
+    public void expire() {
+        this.status = InvitationStatus.EXPIRED;
+    }
+
+    public boolean isPending() {
+        return status == InvitationStatus.PENDING;
+    }
+
+    public boolean isExpired(LocalDateTime now) {
+        return !expiresAt.isAfter(now);
+    }
+
+    public boolean isInvitee(Long userId) {
+        return invitee.getUserId().equals(userId);
+    }
+
+    public boolean isInviter(Long userId) {
+        return inviter.getUserId().equals(userId);
+    }
 }

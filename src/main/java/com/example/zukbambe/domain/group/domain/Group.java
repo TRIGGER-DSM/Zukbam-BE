@@ -29,4 +29,16 @@ public class Group {
     @CreatedDate
     @Column(nullable = false, updatable = false, name = "created_at")
     private LocalDateTime createdAt;
+
+    public static Group of(String title, String introduce) {
+        return Group.builder()
+                .title(title)
+                .introduce(introduce)
+                .build();
+    }
+
+    public void update(String title, String introduce) {
+        this.title = title;
+        this.introduce = introduce;
+    }
 }

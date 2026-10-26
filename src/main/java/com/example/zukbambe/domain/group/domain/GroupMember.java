@@ -47,4 +47,8 @@ public class GroupMember {
                 .role(role)
                 .build();
     }
+
+    public boolean isOwner() {
+        return role == GroupRole.OWNER;
+    }
 }
