@@ -48,4 +48,33 @@ public class Friendship {
                 .status(FriendshipStatus.PENDING)
                 .build();
     }
+
+    public void accept(LocalDateTime acceptedAt) {
+        this.status = FriendshipStatus.ACCEPTED;
+        this.acceptedAt = acceptedAt;
+    }
+
+    public void reject() {
+        this.status = FriendshipStatus.REJECTED;
+    }
+
+    public boolean isPending() {
+        return status == FriendshipStatus.PENDING;
+    }
+
+    public boolean isAccepted() {
+        return status == FriendshipStatus.ACCEPTED;
+    }
+
+    public boolean isReceiver(Long userId) {
+        return receiver.getUserId().equals(userId);
+    }
+
+    public boolean isParticipant(Long userId) {
+        return requester.getUserId().equals(userId) || isReceiver(userId);
+    }
+
+    public User getOther(Long userId) {
+        return requester.getUserId().equals(userId) ? receiver : requester;
+    }
 }
