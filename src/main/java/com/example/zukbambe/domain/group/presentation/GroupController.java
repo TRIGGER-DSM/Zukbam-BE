@@ -1,5 +1,6 @@
 package com.example.zukbambe.domain.group.presentation;
 
+import com.example.zukbambe.domain.group.presentation.dto.request.GroupOwnerTransferRequest;
 import com.example.zukbambe.domain.group.presentation.dto.request.GroupRequest;
 import com.example.zukbambe.domain.group.presentation.dto.response.GroupDetailResponse;
 import com.example.zukbambe.domain.group.presentation.dto.response.GroupListResponse;
@@ -9,6 +10,7 @@ import com.example.zukbambe.domain.group.service.LeaveGroupService;
 import com.example.zukbambe.domain.group.service.QueryGroupDetailService;
 import com.example.zukbambe.domain.group.service.QueryMyGroupsService;
 import com.example.zukbambe.domain.group.service.RemoveGroupMemberService;
+import com.example.zukbambe.domain.group.service.TransferGroupOwnerService;
 import com.example.zukbambe.domain.group.service.UpdateGroupService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -38,6 +41,7 @@ public class GroupController {
     private final DeleteGroupService deleteGroupService;
     private final LeaveGroupService leaveGroupService;
     private final RemoveGroupMemberService removeGroupMemberService;
+    private final TransferGroupOwnerService transferGroupOwnerService;
 
     @PostMapping
     public ResponseEntity<Void> createGroup(@RequestBody @Valid GroupRequest request) {
@@ -65,6 +69,12 @@ public class GroupController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteGroup(@PathVariable Long groupId) {
         deleteGroupService.execute(groupId);
+    }
+
+    @PatchMapping("/{groupId}/owner")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void transferGroupOwner(@PathVariable Long groupId, @RequestBody @Valid GroupOwnerTransferRequest request) {
+        transferGroupOwnerService.execute(groupId, request.newOwnerId());
     }
 
     @DeleteMapping("/{groupId}/members/me")

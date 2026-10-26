@@ -48,6 +48,14 @@ public class GroupMember {
                 .build();
     }
 
+    public void promoteToOwner() {
+        this.role = GroupRole.OWNER;
+    }
+
+    public void demoteToMember() {
+        this.role = GroupRole.MEMBER;
+    }
+
     public boolean isOwner() {
         return role == GroupRole.OWNER;
     }

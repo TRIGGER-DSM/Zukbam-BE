@@ -17,7 +17,8 @@ public enum GroupErrorCode implements ErrorProperty {
     INVITATION_NOT_FOUND(HttpStatus.NOT_FOUND, "G007", "그룹 초대를 찾을 수 없습니다."),
     INVITATION_ALREADY_EXISTS(HttpStatus.CONFLICT, "G008", "이미 대기 중인 그룹 초대가 있습니다."),
     INVITATION_EXPIRED(HttpStatus.GONE, "G009", "만료된 그룹 초대입니다."),
-    SELF_INVITATION(HttpStatus.BAD_REQUEST, "G010", "자기 자신을 초대할 수 없습니다.");
+    SELF_INVITATION(HttpStatus.BAD_REQUEST, "G010", "자기 자신을 초대할 수 없습니다."),
+    SELF_OWNER_TRANSFER(HttpStatus.BAD_REQUEST, "G011", "자기 자신에게 그룹장을 위임할 수 없습니다.");
 
     private final HttpStatus status;
     private final String code;
