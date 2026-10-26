@@ -4,10 +4,11 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public record GroupRequest(
-    @NotBlank
-    @Size(max = 255)
+    @NotBlank(message = "그룹 이름은 필수입니다.")
+    @Size(max = 255, message = "그룹 이름은 255자 이하여야 합니다.")
     String title,
 
-    @Size(max = 255)
+    @Size(max = 255, message = "그룹 소개는 255자 이하여야 합니다.")
     String introduce
-) { }
+) {
+}
