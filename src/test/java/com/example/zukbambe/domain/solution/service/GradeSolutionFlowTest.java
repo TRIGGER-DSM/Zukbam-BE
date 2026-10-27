@@ -42,6 +42,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -146,6 +147,16 @@ class GradeSolutionFlowTest {
         assertThat(solution.getStatus()).isEqualTo(Status.INTERNAL_ERROR);
         assertThat(solution.getTime()).isNull();
         assertThat(solution.getMemoryUsed()).isNull();
+    }
+
+    @Test
+    void 테스트케이스가_없으면_채점하지_않고_INTERNAL_ERROR로_반영한다() {
+        testCaseRepository.deleteAll(testCaseRepository.findAllByProblemOrderByTestcaseIdAsc(problem));
+
+        Solution solution = awaitGraded(submit(Language.PYTHON));
+
+        assertThat(solution.getStatus()).isEqualTo(Status.INTERNAL_ERROR);
+        verify(judgeProvider, never()).judge(any());
     }
 
     @Test

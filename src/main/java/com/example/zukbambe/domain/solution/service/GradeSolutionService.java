@@ -37,6 +37,12 @@ public class GradeSolutionService {
             .map(testCase -> new JudgeCase(testCase.getExampleRead(), testCase.getExampleWrite()))
             .toList();
 
+        if (cases.isEmpty()) {
+            log.error("테스트케이스가 없어 채점할 수 없습니다. solutionId={}", solutionId);
+            applyGradingResultService.execute(solutionId, JudgeResult.internalError());
+            return;
+        }
+
         JudgeResult result;
         try {
             result = judgeProvider.judge(new JudgeRequest(
