@@ -9,6 +9,7 @@ import com.example.zukbambe.domain.solution.domain.Solution;
 import com.example.zukbambe.domain.solution.domain.enums.Language;
 import com.example.zukbambe.domain.solution.domain.enums.Status;
 import com.example.zukbambe.domain.solution.domain.repository.SolutionRepository;
+import com.example.zukbambe.domain.solution.event.PendingSolutionRecoveryListener;
 import com.example.zukbambe.domain.solution.exception.TooManySubmissionsException;
 import com.example.zukbambe.domain.solution.presentation.dto.request.SubmitSolutionRequest;
 import com.example.zukbambe.domain.solvedhistory.domain.SolvedHistoryId;
@@ -56,6 +57,8 @@ class GradeSolutionFlowTest {
     private SubmitSolutionService submitSolutionService;
     @Autowired
     private SolutionRepository solutionRepository;
+    @Autowired
+    private PendingSolutionRecoveryListener pendingSolutionRecoveryListener;
     @Autowired
     private SolvedHistoryRepository solvedHistoryRepository;
     @Autowired
@@ -157,6 +160,16 @@ class GradeSolutionFlowTest {
 
         assertThat(solution.getStatus()).isEqualTo(Status.INTERNAL_ERROR);
         verify(judgeProvider, never()).judge(any());
+    }
+
+    @Test
+    void 재시작_전에_PENDING으로_남은_풀이를_다시_채점한다() {
+        given(judgeProvider.judge(any())).willReturn(new JudgeResult(JudgeStatus.ACCEPTED, 0.012, 3000L));
+        Solution pending = solutionRepository.save(Solution.of(user, problem, Language.PYTHON, "code"));
+
+        pendingSolutionRecoveryListener.recover();
+
+        assertThat(awaitGraded(pending.getSolutionId()).getStatus()).isEqualTo(Status.ACCEPTED);
     }
 
     @Test

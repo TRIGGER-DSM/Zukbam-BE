@@ -1,12 +1,14 @@
 package com.example.zukbambe.domain.solution.domain.repository;
 
 import com.example.zukbambe.domain.solution.domain.Solution;
+import com.example.zukbambe.domain.solution.domain.enums.Status;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface SolutionRepository extends JpaRepository<Solution, Long> {
@@ -30,4 +32,7 @@ public interface SolutionRepository extends JpaRepository<Solution, Long> {
         @Param("email") String email,
         Pageable pageable
     );
+
+    @Query("select s.solutionId from Solution s where s.status = :status order by s.solutionId")
+    List<Long> findIdsByStatus(@Param("status") Status status);
 }
