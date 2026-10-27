@@ -41,6 +41,7 @@ public class SecurityConfig {
                 .requestMatchers("/error").permitAll()
                 .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/auth/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/problems", "/problems/*").permitAll()
                 .requestMatchers(HttpMethod.POST, "/problems").hasRole(Role.TEACHER.name())
                 .requestMatchers(HttpMethod.PUT, "/problems/*").hasRole(Role.TEACHER.name())
                 .requestMatchers(HttpMethod.DELETE, "/problems/*").hasRole(Role.TEACHER.name())

@@ -10,6 +10,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @Component
 @RequiredArgsConstructor
 public class UserFacade {
@@ -26,6 +28,15 @@ public class UserFacade {
 
     public User getCurrentUser() {
         return getUserById(getCurrentUserId());
+    }
+
+    // 비로그인 사용자도 호출할 수 있는 API에서 사용한다
+    public Optional<User> findCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+            return Optional.of(getUserById(userDetails.userId()));
+        }
+        return Optional.empty();
     }
 
     public User getUserById(Long userId) {
