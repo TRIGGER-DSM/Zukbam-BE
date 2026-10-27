@@ -24,10 +24,12 @@ public class QueryProblemDetailService {
     @Transactional(readOnly = true)
     public ProblemDetailResponse execute(Long problemId) {
         Problem problem = problemFacade.getProblemById(problemId);
-        Role role = userFacade.getCurrentUser().getRole();
+        boolean isTeacher = userFacade.findCurrentUser()
+            .map(user -> user.getRole() == Role.TEACHER)
+            .orElse(false);
 
-        // 채점용(숨김) 테스트케이스는 선생님에게만 노출
-        List<TestCase> testCases = role == Role.TEACHER
+        // 채점용(숨김) 테스트케이스는 선생님에게만 노출하고, 비로그인 사용자는 학생과 같게 본다
+        List<TestCase> testCases = isTeacher
             ? testCaseRepository.findAllByProblemOrderByTestcaseIdAsc(problem)
             : testCaseRepository.findAllByProblemAndIsSampleTrueOrderByTestcaseIdAsc(problem);
 
