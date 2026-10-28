@@ -21,11 +21,19 @@ public interface SolutionRepository extends JpaRepository<Solution, Long> {
         """)
     Optional<Solution> findWithProblemBySolutionId(@Param("solutionId") Long solutionId);
 
-    @Query("""
+    @Query(value = """
         select s
         from Solution s
+        join fetch s.user u
         where (:problemId is null or s.problem.problemId = :problemId)
-          and (:email is null or s.user.email = :email)
+          and (:email is null or u.email = :email)
+        """,
+        countQuery = """
+        select count(s)
+        from Solution s
+        join s.user u
+        where (:problemId is null or s.problem.problemId = :problemId)
+          and (:email is null or u.email = :email)
         """)
     Page<Solution> findAllByFilter(
         @Param("problemId") Long problemId,
