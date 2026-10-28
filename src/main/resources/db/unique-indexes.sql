@@ -9,3 +9,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS uk_friendships_active_pair
 CREATE UNIQUE INDEX IF NOT EXISTS uk_group_invitations_pending
     ON tbl_group_invitations (group_id, invitee_id)
     WHERE status = 'PENDING';
+
+-- 한 그룹의 그룹장은 한 명만 존재한다
+CREATE UNIQUE INDEX IF NOT EXISTS uk_group_members_owner
+    ON tbl_group_members (group_id)
+    WHERE role = 'OWNER';
