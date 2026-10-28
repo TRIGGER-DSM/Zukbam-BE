@@ -40,6 +40,10 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -60,6 +64,8 @@ class GradeSolutionFlowTest {
     private SolutionRepository solutionRepository;
     @Autowired
     private PendingSolutionRecoveryListener pendingSolutionRecoveryListener;
+    @Autowired
+    private ApplyGradingResultService applyGradingResultService;
     @Autowired
     private StringRedisTemplate redisTemplate;
     @Autowired
@@ -174,6 +180,36 @@ class GradeSolutionFlowTest {
         pendingSolutionRecoveryListener.recover();
 
         assertThat(awaitGraded(pending.getSolutionId()).getStatus()).isEqualTo(Status.ACCEPTED);
+    }
+
+    @Test
+    void 같은_문제를_동시에_맞혀도_두_풀이_모두_반영한다() throws Exception {
+        List<Solution> solutions = List.of(
+            solutionRepository.save(Solution.of(user, problem, Language.PYTHON, "code")),
+            solutionRepository.save(Solution.of(user, problem, Language.PYTHON, "code"))
+        );
+        JudgeResult accepted = new JudgeResult(JudgeStatus.ACCEPTED, 0.012, 3000L);
+        CountDownLatch start = new CountDownLatch(1);
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        List<Future<?>> futures = solutions.stream()
+            .map(solution -> executor.submit(() -> {
+                start.await();
+                applyGradingResultService.execute(solution.getSolutionId(), accepted);
+                return null;
+            }))
+            .<Future<?>>map(future -> future)
+            .toList();
+        start.countDown();
+        for (Future<?> future : futures) {
+            future.get();
+        }
+        executor.shutdown();
+
+        solutions.forEach(solution -> assertThat(solutionRepository.findById(solution.getSolutionId()).orElseThrow().getStatus())
+            .isEqualTo(Status.ACCEPTED));
+        assertThat(solvedHistoryRepository.countByIdUserId(user.getUserId())).isEqualTo(1);
+        assertThat(streakRepository.findById(user.getUserId()).orElseThrow().getMaxStreak()).isEqualTo(1);
     }
 
     @Test
