@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -60,6 +61,8 @@ class GradeSolutionFlowTest {
     @Autowired
     private PendingSolutionRecoveryListener pendingSolutionRecoveryListener;
     @Autowired
+    private StringRedisTemplate redisTemplate;
+    @Autowired
     private SolvedHistoryRepository solvedHistoryRepository;
     @Autowired
     private StreakRepository streakRepository;
@@ -86,6 +89,7 @@ class GradeSolutionFlowTest {
             .role(Role.STUDENT)
             .rank(rank)
             .build());
+        redisTemplate.delete("solution-submit:" + user.getUserId());
         problem = problemRepository.save(Problem.builder()
             .title("problem-" + unique)
             .content("content")
