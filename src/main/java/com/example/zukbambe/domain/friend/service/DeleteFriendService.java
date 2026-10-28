@@ -1,0 +1,24 @@
+package com.example.zukbambe.domain.friend.service;
+
+import com.example.zukbambe.domain.friend.domain.repository.FriendshipRepository;
+import com.example.zukbambe.domain.friend.facade.FriendshipFacade;
+import com.example.zukbambe.domain.user.facade.UserFacade;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+public class DeleteFriendService {
+
+    private final UserFacade userFacade;
+    private final FriendshipFacade friendshipFacade;
+    private final FriendshipRepository friendshipRepository;
+
+    @Transactional
+    public void execute(Long friendshipId) {
+        friendshipRepository.delete(
+            friendshipFacade.getMyFriendship(friendshipId, userFacade.getCurrentUserId())
+        );
+    }
+}
