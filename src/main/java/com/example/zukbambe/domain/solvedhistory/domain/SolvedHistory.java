@@ -33,12 +33,4 @@ public class SolvedHistory {
     @CreatedDate
     @Column(nullable = false, updatable = false, name = "solved_time")
     private LocalDateTime solvedDate;
-
-    public static SolvedHistory of(User user, Problem problem) {
-        return SolvedHistory.builder()
-                .id(new SolvedHistoryId(user.getUserId(), problem.getProblemId()))
-                .user(user)
-                .problem(problem)
-                .build();
-    }
 }

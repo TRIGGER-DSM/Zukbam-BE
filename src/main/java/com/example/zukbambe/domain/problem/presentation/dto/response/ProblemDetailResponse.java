@@ -13,7 +13,7 @@ public record ProblemDetailResponse(
     String title,
     String content,
     Long memoryLimit,
-    Long timeLimit,
+    Double timeLimit,
     ProblemRank rank,
     List<TestCaseResponse> testCases
 ) {
