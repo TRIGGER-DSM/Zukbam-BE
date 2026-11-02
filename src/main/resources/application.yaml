@@ -75,7 +75,7 @@ judge0:
   request-timeout: ${JUDGE0_REQUEST_TIMEOUT:5s}
   idle-timeout: ${JUDGE0_IDLE_TIMEOUT:2m}
 
-# Datadog Log Pipeline(Grok)이 이 형식을 파싱한다. 바꾸면 monitoring/datadog/logs-pipeline.json 도 함께 바꿀 것
+# Datadog Log Pipeline(Grok)이 이 형식을 파싱한다. 바꾸면 monitoring/datadog/logs/pipeline.json 도 함께 바꿀 것
 # dd.trace_id/dd.span_id 는 dd-java-agent(DD_LOGS_INJECTION)가 MDC에 넣어 주며, 에이전트가 없으면 0으로 남는다
 logging:
   pattern:
