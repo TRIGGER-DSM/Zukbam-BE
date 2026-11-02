@@ -183,8 +183,8 @@
     ]
   },
   "options": {
-    "tick_every": 300,
-    "min_failure_duration": 300,
+    "tick_every": 1800,
+    "min_failure_duration": 0,
     "min_location_failed": 1,
     "retry": {
       "count": 1,
@@ -195,5 +195,5 @@
     },
     "monitor_name": "[Zukbam-BE] Synthetics 로그인·문제 조회"
   },
-  "message": "{{#is_alert}}🔴 외부에서 로그인·문제 조회 흐름이 실패하고 있습니다 (5분 이상 지속).\n서버가 죽었거나, 공인 IP/포트 포워딩, 인증(JWT) 쪽 문제일 수 있습니다.{{/is_alert}}\n{{#is_recovery}}✅ 로그인·문제 조회 흐름이 복구됐습니다.{{/is_recovery}}\n\n@webhook-discord"
+  "message": "{{#is_alert}}🔴 외부에서 로그인·문제 조회 흐름이 실패했습니다 (재시도 후에도 실패).\n서버가 죽었거나, 공인 IP/포트 포워딩, 인증(JWT) 쪽 문제일 수 있습니다.{{/is_alert}}\n{{#is_recovery}}✅ 로그인·문제 조회 흐름이 복구됐습니다.{{/is_recovery}}\n\n@webhook-discord"
 }

@@ -15,10 +15,6 @@
         {
           "path": "@solution.language",
           "tag_name": "language"
-        },
-        {
-          "path": "@solution.result",
-          "tag_name": "result"
         }
       ]
     }
