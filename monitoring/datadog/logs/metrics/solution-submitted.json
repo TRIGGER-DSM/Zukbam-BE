@@ -1,0 +1,20 @@
+{
+  "data": {
+    "id": "zukbam.solution.submitted",
+    "type": "logs_metrics",
+    "attributes": {
+      "compute": {
+        "aggregation_type": "count"
+      },
+      "filter": {
+        "query": "service:zukbam-be @solution.event:solution_submitted"
+      },
+      "group_by": [
+        {
+          "path": "@solution.language",
+          "tag_name": "language"
+        }
+      ]
+    }
+  }
+}

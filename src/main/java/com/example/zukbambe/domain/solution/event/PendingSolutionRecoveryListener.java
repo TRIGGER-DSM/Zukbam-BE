@@ -2,6 +2,8 @@ package com.example.zukbambe.domain.solution.event;
 
 import com.example.zukbambe.domain.solution.domain.enums.Status;
 import com.example.zukbambe.domain.solution.domain.repository.SolutionRepository;
+import com.example.zukbambe.domain.solution.metric.GradingFailure;
+import com.example.zukbambe.domain.solution.metric.SolutionMetricLogger;
 import com.example.zukbambe.domain.solution.service.ApplyGradingResultService;
 import com.example.zukbambe.domain.solution.service.GradeSolutionService;
 import com.example.zukbambe.global.judge.dto.JudgeResult;
@@ -22,6 +24,7 @@ public class PendingSolutionRecoveryListener {
     private final SolutionRepository solutionRepository;
     private final GradeSolutionService gradeSolutionService;
     private final ApplyGradingResultService applyGradingResultService;
+    private final SolutionMetricLogger solutionMetricLogger;
 
     // 채점 대기열은 메모리에만 있어서, 재시작 전에 PENDING으로 남은 풀이는 다시 채점한다
     @EventListener(ApplicationReadyEvent.class)
@@ -36,7 +39,11 @@ public class PendingSolutionRecoveryListener {
                 gradeSolutionService.execute(solutionId);
             } catch (TaskRejectedException e) {
                 log.error("채점 대기열이 가득 찼습니다. solutionId={}", solutionId, e);
-                applyGradingResultService.execute(solutionId, JudgeResult.internalError());
+                solutionMetricLogger.graded(
+                    applyGradingResultService.execute(solutionId, JudgeResult.internalError()),
+                    null,
+                    GradingFailure.QUEUE_FULL
+                );
             }
         }
     }

@@ -68,5 +68,5 @@ jobs:
       - name: Build and push image
         run: |
           IMAGE=ghcr.io/$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]'):latest
-          docker build -t "$IMAGE" .
+          docker build --build-arg DD_VERSION="${GITHUB_SHA::7}" -t "$IMAGE" .
           docker push "$IMAGE"

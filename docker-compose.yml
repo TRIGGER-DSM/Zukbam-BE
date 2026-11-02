@@ -17,6 +17,21 @@ services:
       MAIL_PASSWORD: ${MAIL_PASSWORD:?MAIL_PASSWORD is required}
       AUTH_TEACHER_CODE: ${AUTH_TEACHER_CODE:?AUTH_TEACHER_CODE is required}
       JUDGE0_URL: http://judge0-server:2358
+      # Datadog APM (이미지에 들어 있는 dd-java-agent를 붙인다. DD_VERSION은 이미지 ENV에 있음)
+      JAVA_TOOL_OPTIONS: -javaagent:/app/dd-java-agent.jar
+      DD_AGENT_HOST: datadog-agent
+      DD_SERVICE: zukbam-be
+      DD_ENV: ${DD_ENV:-prod}
+      DD_LOGS_INJECTION: "true"
+      DD_RUNTIME_METRICS_ENABLED: "true"
+      # 프로파일러는 Student Pack 범위 밖이고 alpine(musl)에서 네이티브 라이브러리 문제가 있어 끈다
+      DD_PROFILING_ENABLED: "false"
+    labels:
+      com.datadoghq.tags.service: zukbam-be
+      com.datadoghq.tags.env: ${DD_ENV:-prod}
+      # 이 컨테이너 로그만 수집한다. 앱 로그(날짜)나 tracer 자체 로그([dd.trace)로 시작하지 않는 줄은
+      # 스택트레이스로 보고 앞 로그에 붙인다
+      com.datadoghq.ad.logs: '[{"source":"java","service":"zukbam-be","log_processing_rules":[{"type":"multi_line","name":"log_start","pattern":"(\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}|\\[dd\\.trace )"}]}]'
     depends_on:
       db:
         condition: service_healthy
@@ -108,7 +123,32 @@ services:
       timeout: 5s
       retries: 10
 
+  # APM·로그·컨테이너 메트릭을 Datadog으로 보낸다. 포트는 열지 않고 compose 내부망에서만 받는다
+  datadog-agent:
+    image: datadog/agent:7.84.6
+    restart: unless-stopped
+    environment:
+      DD_API_KEY: ${DD_API_KEY:?DD_API_KEY is required}
+      DD_SITE: ${DD_SITE:-us5.datadoghq.com}
+      DD_ENV: ${DD_ENV:-prod}
+      DD_HOSTNAME: ${DD_HOSTNAME:-zukbam-home}
+      DD_APM_ENABLED: "true"
+      DD_APM_NON_LOCAL_TRAFFIC: "true"
+      DD_DOGSTATSD_NON_LOCAL_TRAFFIC: "true"
+      DD_LOGS_ENABLED: "true"
+      # 라벨(com.datadoghq.ad.logs)이 붙은 컨테이너(backend) 로그만 수집한다
+      DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL: "false"
+      DD_LOGS_CONFIG_DOCKER_CONTAINER_USE_FILE: "true"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /proc/:/host/proc/:ro
+      - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      # 재시작해도 어디까지 로그를 보냈는지 기억해서 중복·누락을 막는다
+      - datadog-run:/opt/datadog-agent/run
+
 volumes:
   pgdata:
   redisdata:
   judge0-pgdata:
+  datadog-run:

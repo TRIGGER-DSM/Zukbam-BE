@@ -1,0 +1,17 @@
+{
+  "data": {
+    "id": "zukbam.solution.turnaround_ms",
+    "type": "logs_metrics",
+    "attributes": {
+      "compute": {
+        "aggregation_type": "distribution",
+        "path": "@solution.turnaround_ms",
+        "include_percentiles": true
+      },
+      "filter": {
+        "query": "service:zukbam-be @solution.event:grading_completed"
+      },
+      "group_by": []
+    }
+  }
+}

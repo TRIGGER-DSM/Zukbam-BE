@@ -1,0 +1,781 @@
+{
+  "title": "Zukbam-BE 서비스 개요",
+  "description": "APM, 제출·채점 지표, JVM. monitoring/datadog/dashboards 에서 관리하며 UI에서 바꾼 내용은 apply 시 덮어쓴다.",
+  "layout_type": "ordered",
+  "reflow_type": "auto",
+  "widgets": [
+    {
+      "definition": {
+        "type": "group",
+        "title": "API (APM)",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "definition": {
+              "type": "query_value",
+              "title": "요청 수",
+              "autoscale": true,
+              "precision": 0,
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "hits",
+                      "query": "sum:trace.servlet.request.hits{service:zukbam-be,env:prod}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "hits"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "query_value",
+              "title": "에러율 (%)",
+              "autoscale": true,
+              "precision": 2,
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "err",
+                      "query": "sum:trace.servlet.request.errors{service:zukbam-be,env:prod}.as_count()",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "hits",
+                      "query": "sum:trace.servlet.request.hits{service:zukbam-be,env:prod}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "100 * err / hits"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 5,
+                      "palette": "white_on_red"
+                    },
+                    {
+                      "comparator": ">",
+                      "value": 1,
+                      "palette": "white_on_yellow"
+                    },
+                    {
+                      "comparator": "<=",
+                      "value": 1,
+                      "palette": "white_on_green"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "query_value",
+              "title": "p95 응답시간",
+              "autoscale": true,
+              "precision": 3,
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "p95",
+                      "query": "p95:trace.servlet.request{service:zukbam-be,env:prod}",
+                      "aggregator": "max"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "p95",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "timeseries",
+              "title": "요청 수 / 에러 수",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "hits",
+                      "query": "sum:trace.servlet.request.hits{service:zukbam-be,env:prod}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "err",
+                      "query": "sum:trace.servlet.request.errors{service:zukbam-be,env:prod}.as_count()"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "hits",
+                      "alias": "요청"
+                    },
+                    {
+                      "formula": "err",
+                      "alias": "에러"
+                    }
+                  ],
+                  "display_type": "bars"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "timeseries",
+              "title": "응답시간 p50 / p95 / p99",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "p50",
+                      "query": "p50:trace.servlet.request{service:zukbam-be,env:prod}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "p95",
+                      "query": "p95:trace.servlet.request{service:zukbam-be,env:prod}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "p99",
+                      "query": "p99:trace.servlet.request{service:zukbam-be,env:prod}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "p50",
+                      "alias": "p50"
+                    },
+                    {
+                      "formula": "p95",
+                      "alias": "p95"
+                    },
+                    {
+                      "formula": "p99",
+                      "alias": "p99"
+                    }
+                  ],
+                  "display_type": "line"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "toplist",
+              "title": "엔드포인트별 요청 수",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "hits",
+                      "query": "sum:trace.servlet.request.hits{service:zukbam-be,env:prod} by {resource_name}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "hits",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "toplist",
+              "title": "엔드포인트별 에러 수",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "err",
+                      "query": "sum:trace.servlet.request.errors{service:zukbam-be,env:prod} by {resource_name}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "err",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "type": "group",
+        "title": "제출 · 채점 (커스텀 로그 → 로그 기반 메트릭)",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "definition": {
+              "type": "query_value",
+              "title": "제출 수",
+              "autoscale": true,
+              "precision": 0,
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "sub",
+                      "query": "sum:zukbam.solution.submitted{*}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "sub"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "query_value",
+              "title": "채점 시스템 실패율 (%)",
+              "autoscale": true,
+              "precision": 2,
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "fail",
+                      "query": "sum:zukbam.solution.graded{system_failure:true}.as_count()",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "all",
+                      "query": "sum:zukbam.solution.graded{*}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "100 * default_zero(fail) / all"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 5,
+                      "palette": "white_on_red"
+                    },
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "white_on_yellow"
+                    },
+                    {
+                      "comparator": "<=",
+                      "value": 0,
+                      "palette": "white_on_green"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "query_value",
+              "title": "정답률 (%)",
+              "autoscale": true,
+              "precision": 1,
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "ac",
+                      "query": "sum:zukbam.solution.graded{result:accepted}.as_count()",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "all",
+                      "query": "sum:zukbam.solution.graded{system_failure:false}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "100 * default_zero(ac) / all"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "query_value",
+              "title": "채점 소요시간 p95 (제출→완료)",
+              "autoscale": true,
+              "precision": 0,
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "p95",
+                      "query": "p95:zukbam.solution.turnaround_ms{*}",
+                      "aggregator": "max"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "p95",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "millisecond"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "timeseries",
+              "title": "언어별 제출 수",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "sub",
+                      "query": "sum:zukbam.solution.submitted{*} by {language}.as_count()"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "sub"
+                    }
+                  ],
+                  "display_type": "bars"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "toplist",
+              "title": "채점 결과 분포",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "g",
+                      "query": "sum:zukbam.solution.graded{*} by {result}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "g",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "timeseries",
+              "title": "채점 소요시간 (ms)",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "t50",
+                      "query": "p50:zukbam.solution.turnaround_ms{*}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "t95",
+                      "query": "p95:zukbam.solution.turnaround_ms{*}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "j95",
+                      "query": "p95:zukbam.solution.judge_ms{*}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "t50",
+                      "alias": "제출→완료 p50"
+                    },
+                    {
+                      "formula": "t95",
+                      "alias": "제출→완료 p95"
+                    },
+                    {
+                      "formula": "j95",
+                      "alias": "Judge0 호출 p95"
+                    }
+                  ],
+                  "display_type": "line"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "timeseries",
+              "title": "언어별 Judge0 호출 시간 p95 (ms)",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "j",
+                      "query": "p95:zukbam.solution.judge_ms{*} by {language}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "j"
+                    }
+                  ],
+                  "display_type": "line"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "timeseries",
+              "title": "채점 시스템 실패 (원인별)",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "f",
+                      "query": "sum:zukbam.solution.graded{system_failure:true} by {failure_reason}.as_count()"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "f"
+                    }
+                  ],
+                  "display_type": "bars"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "timeseries",
+              "title": "제출 rate limit 초과",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "r",
+                      "query": "sum:zukbam.solution.rate_limited{*}.as_count()"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "r"
+                    }
+                  ],
+                  "display_type": "bars"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "list_stream",
+              "title": "최근 채점 시스템 실패 로그",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "service:zukbam-be @solution.system_failure:true",
+                    "indexes": [],
+                    "storage": "hot"
+                  },
+                  "columns": [
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@solution.language",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@solution.failure_reason",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "@solution.solution_id",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "type": "group",
+        "title": "JVM / 컨테이너",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "definition": {
+              "type": "timeseries",
+              "title": "Heap 사용량",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "used",
+                      "query": "avg:jvm.heap_memory{service:zukbam-be}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "max",
+                      "query": "avg:jvm.heap_memory_max{service:zukbam-be}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "used",
+                      "alias": "used"
+                    },
+                    {
+                      "formula": "max",
+                      "alias": "max"
+                    }
+                  ],
+                  "display_type": "line"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "timeseries",
+              "title": "GC 시간",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "minor",
+                      "query": "sum:jvm.gc.minor_collection_time{service:zukbam-be}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "major",
+                      "query": "sum:jvm.gc.major_collection_time{service:zukbam-be}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "minor",
+                      "alias": "minor"
+                    },
+                    {
+                      "formula": "major",
+                      "alias": "major"
+                    }
+                  ],
+                  "display_type": "bars"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "timeseries",
+              "title": "스레드 수",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "t",
+                      "query": "avg:jvm.thread_count{service:zukbam-be}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "t"
+                    }
+                  ],
+                  "display_type": "line"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "timeseries",
+              "title": "컨테이너 메모리",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "m",
+                      "query": "avg:container.memory.usage{host:zukbam-home} by {container_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "m"
+                    }
+                  ],
+                  "display_type": "line"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "timeseries",
+              "title": "컨테이너 CPU",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "c",
+                      "query": "avg:container.cpu.usage{host:zukbam-home} by {container_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "c"
+                    }
+                  ],
+                  "display_type": "line"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": []
+}

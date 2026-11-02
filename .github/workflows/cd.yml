@@ -38,6 +38,7 @@ jobs:
           AUTH_TEACHER_CODE: ${{ secrets.AUTH_TEACHER_CODE }}
           JUDGE0_DB_PASSWORD: ${{ secrets.JUDGE0_DB_PASSWORD }}
           JUDGE0_REDIS_PASSWORD: ${{ secrets.JUDGE0_REDIS_PASSWORD }}
+          DD_API_KEY: ${{ secrets.DD_API_KEY }}
         run: |
           export APP_IMAGE=ghcr.io/$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]'):latest
           docker compose -p zukbam pull backend
