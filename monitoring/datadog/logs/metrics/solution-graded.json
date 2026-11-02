@@ -1,0 +1,32 @@
+{
+  "data": {
+    "id": "zukbam.solution.graded",
+    "type": "logs_metrics",
+    "attributes": {
+      "compute": {
+        "aggregation_type": "count"
+      },
+      "filter": {
+        "query": "service:zukbam-be @solution.event:grading_completed"
+      },
+      "group_by": [
+        {
+          "path": "@solution.language",
+          "tag_name": "language"
+        },
+        {
+          "path": "@solution.result",
+          "tag_name": "result"
+        },
+        {
+          "path": "@solution.system_failure",
+          "tag_name": "system_failure"
+        },
+        {
+          "path": "@solution.failure_reason",
+          "tag_name": "failure_reason"
+        }
+      ]
+    }
+  }
+}

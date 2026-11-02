@@ -1,0 +1,15 @@
+{
+  "data": {
+    "id": "zukbam.solution.rate_limited",
+    "type": "logs_metrics",
+    "attributes": {
+      "compute": {
+        "aggregation_type": "count"
+      },
+      "filter": {
+        "query": "service:zukbam-be @solution.event:submission_rate_limited"
+      },
+      "group_by": []
+    }
+  }
+}

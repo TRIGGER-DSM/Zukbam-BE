@@ -1,0 +1,26 @@
+{
+  "data": {
+    "id": "zukbam.solution.judge_ms",
+    "type": "logs_metrics",
+    "attributes": {
+      "compute": {
+        "aggregation_type": "distribution",
+        "path": "@solution.judge_ms",
+        "include_percentiles": true
+      },
+      "filter": {
+        "query": "service:zukbam-be @solution.event:grading_completed @solution.judge_ms:*"
+      },
+      "group_by": [
+        {
+          "path": "@solution.language",
+          "tag_name": "language"
+        },
+        {
+          "path": "@solution.result",
+          "tag_name": "result"
+        }
+      ]
+    }
+  }
+}
