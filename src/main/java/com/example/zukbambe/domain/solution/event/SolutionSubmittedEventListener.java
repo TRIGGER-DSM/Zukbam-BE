@@ -1,5 +1,7 @@
 package com.example.zukbambe.domain.solution.event;
 
+import com.example.zukbambe.domain.solution.metric.GradingFailure;
+import com.example.zukbambe.domain.solution.metric.SolutionMetricLogger;
 import com.example.zukbambe.domain.solution.service.ApplyGradingResultService;
 import com.example.zukbambe.domain.solution.service.GradeSolutionService;
 import com.example.zukbambe.global.judge.dto.JudgeResult;
@@ -17,6 +19,7 @@ public class SolutionSubmittedEventListener {
 
     private final GradeSolutionService gradeSolutionService;
     private final ApplyGradingResultService applyGradingResultService;
+    private final SolutionMetricLogger solutionMetricLogger;
 
     // 커밋 전에 채점을 시작하면 채점 스레드가 Solution을 찾지 못한다
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -25,7 +28,11 @@ public class SolutionSubmittedEventListener {
             gradeSolutionService.execute(event.solutionId());
         } catch (TaskRejectedException e) {
             log.error("채점 대기열이 가득 찼습니다. solutionId={}", event.solutionId(), e);
-            applyGradingResultService.execute(event.solutionId(), JudgeResult.internalError());
+            solutionMetricLogger.graded(
+                applyGradingResultService.execute(event.solutionId(), JudgeResult.internalError()),
+                null,
+                GradingFailure.QUEUE_FULL
+            );
         }
     }
 }

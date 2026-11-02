@@ -4,6 +4,8 @@ import com.example.zukbambe.domain.problem.domain.Problem;
 import com.example.zukbambe.domain.solution.domain.Solution;
 import com.example.zukbambe.domain.solution.domain.repository.SolutionRepository;
 import com.example.zukbambe.domain.solution.exception.SolutionNotFoundException;
+import com.example.zukbambe.domain.solution.metric.GradingFailure;
+import com.example.zukbambe.domain.solution.metric.SolutionMetricLogger;
 import com.example.zukbambe.domain.testcase.domain.repository.TestCaseRepository;
 import com.example.zukbambe.global.config.AsyncConfig;
 import com.example.zukbambe.global.judge.JudgeProvider;
@@ -15,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.List;
 
 @Slf4j
@@ -26,6 +29,7 @@ public class GradeSolutionService {
     private final TestCaseRepository testCaseRepository;
     private final JudgeProvider judgeProvider;
     private final ApplyGradingResultService applyGradingResultService;
+    private final SolutionMetricLogger solutionMetricLogger;
 
     // polling이 길어질 수 있어서 채점 중에는 트랜잭션(DB 커넥션)을 잡지 않는다
     @Async(AsyncConfig.JUDGE_EXECUTOR)
@@ -39,11 +43,17 @@ public class GradeSolutionService {
 
         if (cases.isEmpty()) {
             log.error("테스트케이스가 없어 채점할 수 없습니다. solutionId={}", solutionId);
-            applyGradingResultService.execute(solutionId, JudgeResult.internalError());
+            solutionMetricLogger.graded(
+                applyGradingResultService.execute(solutionId, JudgeResult.internalError()),
+                null,
+                GradingFailure.NO_TESTCASE
+            );
             return;
         }
 
         JudgeResult result;
+        GradingFailure failure = null;
+        long judgeStartedAt = System.nanoTime();
         try {
             result = judgeProvider.judge(new JudgeRequest(
                 solution.getLanguage().getJudgeLanguage(),
@@ -55,8 +65,10 @@ public class GradeSolutionService {
         } catch (RuntimeException e) {
             log.error("채점에 실패했습니다. solutionId={}", solutionId, e);
             result = JudgeResult.internalError();
+            failure = GradingFailure.JUDGE_ERROR;
         }
+        Duration judgeDuration = Duration.ofNanos(System.nanoTime() - judgeStartedAt);
 
-        applyGradingResultService.execute(solutionId, result);
+        solutionMetricLogger.graded(applyGradingResultService.execute(solutionId, result), judgeDuration, failure);
     }
 }

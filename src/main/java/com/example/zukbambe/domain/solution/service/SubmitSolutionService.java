@@ -6,6 +6,7 @@ import com.example.zukbambe.domain.solution.domain.Solution;
 import com.example.zukbambe.domain.solution.domain.repository.SolutionRepository;
 import com.example.zukbambe.domain.solution.event.SolutionSubmittedEvent;
 import com.example.zukbambe.domain.solution.exception.TooManySubmissionsException;
+import com.example.zukbambe.domain.solution.metric.SolutionMetricLogger;
 import com.example.zukbambe.domain.solution.presentation.dto.request.SubmitSolutionRequest;
 import com.example.zukbambe.domain.user.domain.User;
 import com.example.zukbambe.domain.user.facade.UserFacade;
@@ -29,6 +30,7 @@ public class SubmitSolutionService {
     private final ProblemFacade problemFacade;
     private final ApplicationEventPublisher eventPublisher;
     private final StringRedisTemplate redisTemplate;
+    private final SolutionMetricLogger solutionMetricLogger;
 
     @Transactional
     public Long execute(Long problemId, SubmitSolutionRequest request) {
@@ -38,6 +40,7 @@ public class SubmitSolutionService {
 
         Solution solution = solutionRepository.save(Solution.of(user, problem, request.language(), request.code()));
         eventPublisher.publishEvent(new SolutionSubmittedEvent(solution.getSolutionId()));
+        solutionMetricLogger.submitted(solution.getSolutionId(), problemId, request.language());
 
         return solution.getSolutionId();
     }
@@ -49,6 +52,7 @@ public class SubmitSolutionService {
             redisTemplate.expire(key, SUBMIT_WINDOW);
         }
         if (count != null && count > SUBMIT_LIMIT) {
+            solutionMetricLogger.rateLimited(userId);
             throw new TooManySubmissionsException();
         }
     }
