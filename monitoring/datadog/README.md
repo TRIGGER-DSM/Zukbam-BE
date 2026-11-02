@@ -148,4 +148,4 @@ python3 monitoring/datadog/apply.py --only monitors dashboards   # 일부만
   - `datadog/agent` 이미지는 `docker-compose.yml`의 태그를 바꾼다.
   - `dd-java-agent`는 `Dockerfile`의 `DD_JAVA_AGENT_VERSION`과 `DD_JAVA_AGENT_SHA256`을 함께 바꾼다. sha256은 Maven Central의 jar로 계산한다.
 - **로컬 실행에는 영향이 없다.** 로컬에서 `bootRun`할 때는 에이전트가 붙지 않아 로그의 `dd.trace_id`가 `0`으로 남는다.
-- **기존 Grafana와 겹치지 않는다.** Datadog Agent는 호스트 포트를 쓰지 않는다.
+- Datadog Agent는 호스트 포트를 쓰지 않으므로, 나중에 같은 서버에 다른 모니터링 도구를 올려도 포트가 겹치지 않는다.
