@@ -29,4 +29,20 @@ public interface UserRepository extends JpaRepository<User, Long> {
         nativeQuery = true
     )
     int addXp(@Param("userId") Long userId, @Param("amount") long amount);
+
+    @Modifying
+    @Query(
+        value = """
+            update tbl_users
+            set xp = xp + :amount,
+                user_rank_id = (
+                    select r.user_rank_id from tbl_user_ranks r
+                    where r.score <= xp + :amount
+                    order by r.score desc limit 1
+                )
+            where user_id in (select sh.user_id from tbl_solved_histories sh where sh.problem_id = :problemId)
+            """,
+        nativeQuery = true
+    )
+    int addXpToProblemSolvers(@Param("problemId") Long problemId, @Param("amount") long amount);
 }

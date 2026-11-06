@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 public class XpFacade {
 
     private static final String SOLVE_REASON = "문제 풀이";
+    private static final String PROBLEM_RANK_CHANGE_REASON = "문제 난이도 변경";
 
     private final XpHistoryRepository xpHistoryRepository;
     private final UserRepository userRepository;
@@ -30,5 +31,14 @@ public class XpFacade {
             user, amount, SOLVE_REASON, problem.getProblemId(), problem.getTitle(), LocalDateTime.now(clock)
         ));
         userRepository.addXp(user.getUserId(), amount);
+    }
+
+    // 문제의 랭크가 바뀌면 이미 푼 사람도 새 기준과 같은 XP를 갖도록 차액을 준다
+    @Transactional
+    public void compensateProblemSolvers(Problem problem, long amount) {
+        xpHistoryRepository.insertForProblemSolvers(
+            problem.getProblemId(), amount, PROBLEM_RANK_CHANGE_REASON, LocalDateTime.now(clock)
+        );
+        userRepository.addXpToProblemSolvers(problem.getProblemId(), amount);
     }
 }
