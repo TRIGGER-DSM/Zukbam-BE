@@ -1,6 +1,8 @@
 package com.example.zukbambe.domain.ranking.domain.repository;
 
 import com.example.zukbambe.domain.ranking.domain.RankingSnapshot;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -44,5 +46,45 @@ public interface RankingSnapshotRepository extends JpaRepository<RankingSnapshot
         @Param("start") LocalDateTime start,
         @Param("now") LocalDateTime now,
         @Param("today") LocalDate today
+    );
+
+    // 선생님 제외를 순위 계산 전에 걸어야 제외했을 때 순위가 1부터 다시 매겨진다
+    @Query(
+        value = """
+            select ranked.position as "position", ranked.user_id as "userId", ranked.name as "name",
+                   ranked.rank_name as "rankName", ranked.xp as "xp", ranked.solved_count as "solvedCount",
+                   ranked.streak as "streak"
+            from (
+                select row_number() over (
+                           order by case cast(:metric as varchar)
+                                        when 'XP' then s.xp
+                                        when 'SOLVED_COUNT' then s.solved_count
+                                        else s.streak
+                                    end desc,
+                                    s.user_id
+                       ) as position,
+                       s.user_id, u.name, r.name as rank_name, s.xp, s.solved_count, s.streak
+                from tbl_ranking_snapshots s
+                join tbl_users u on u.user_id = s.user_id
+                join tbl_user_ranks r on r.user_rank_id = s.user_rank_id
+                where s.period = cast(:period as varchar)
+                  and (:excludeTeachers = false or u.role <> 'TEACHER')
+            ) ranked
+            order by ranked.position
+            """,
+        countQuery = """
+            select count(*)
+            from tbl_ranking_snapshots s
+            join tbl_users u on u.user_id = s.user_id
+            where s.period = cast(:period as varchar)
+              and (:excludeTeachers = false or u.role <> 'TEACHER')
+            """,
+        nativeQuery = true
+    )
+    Page<RankingRow> findRanking(
+        @Param("metric") String metric,
+        @Param("period") String period,
+        @Param("excludeTeachers") boolean excludeTeachers,
+        Pageable pageable
     );
 }
