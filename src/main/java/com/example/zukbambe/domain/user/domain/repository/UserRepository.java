@@ -69,4 +69,48 @@ public interface UserRepository extends JpaRepository<User, Long> {
         nativeQuery = true
     )
     int addXpToProblemRankSolvers(@Param("problemRankId") Long problemRankId, @Param("amount") long amount);
+
+    // 내역 합계를 기준값으로 보고 XP와 랭크를 다시 맞춘다. 랭크 기준이 DB에서 바뀌었을 때도 여기서 반영된다
+    @Modifying
+    @Query(
+        value = """
+            update tbl_users u
+            set xp = t.total,
+                user_rank_id = (
+                    select r.user_rank_id from tbl_user_ranks r
+                    where r.score <= t.total
+                    order by r.score desc limit 1
+                )
+            from (
+                select coalesce(sum(h.amount), 0) as total
+                from tbl_xp_histories h
+                where h.user_id = :userId
+            ) t
+            where u.user_id = :userId
+            """,
+        nativeQuery = true
+    )
+    int recalculateXp(@Param("userId") Long userId);
+
+    @Modifying
+    @Query(
+        value = """
+            update tbl_users u
+            set xp = t.total,
+                user_rank_id = (
+                    select r.user_rank_id from tbl_user_ranks r
+                    where r.score <= t.total
+                    order by r.score desc limit 1
+                )
+            from (
+                select u2.user_id, coalesce(sum(h.amount), 0) as total
+                from tbl_users u2
+                left join tbl_xp_histories h on h.user_id = u2.user_id
+                group by u2.user_id
+            ) t
+            where t.user_id = u.user_id
+            """,
+        nativeQuery = true
+    )
+    int recalculateAllXp();
 }
