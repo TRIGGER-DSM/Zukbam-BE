@@ -11,7 +11,8 @@ spring:
   sql:
     init:
       mode: always
-      schema-locations: classpath:db/unique-indexes.sql
+      schema-locations: classpath:db/unique-indexes.sql,classpath:db/rank-migration.sql
+      separator: "@@"
 
   jpa:
     defer-datasource-initialization: true
