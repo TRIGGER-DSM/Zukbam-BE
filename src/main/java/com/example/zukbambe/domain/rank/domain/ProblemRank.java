@@ -21,12 +21,8 @@ public class ProblemRank {
     @Column(nullable = false, name = "xp")
     private Long xp;
 
-    @Column(nullable = false, name = "sort_order")
-    private Integer sortOrder;
-
-    public void update(String name, Long xp, Integer sortOrder) {
+    public void update(String name, Long xp) {
         this.name = name;
         this.xp = xp;
-        this.sortOrder = sortOrder;
     }
 }

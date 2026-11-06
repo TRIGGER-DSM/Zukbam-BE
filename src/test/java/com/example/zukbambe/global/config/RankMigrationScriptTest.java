@@ -99,6 +99,17 @@ class RankMigrationScriptTest {
     }
 
     @Test
+    void 예전_순서_컬럼이_남아_있으면_지운다() {
+        try {
+            jdbcTemplate.execute("alter table tbl_problem_ranks add column sort_order integer not null default 0");
+            runRankMigrationScript();
+            assertThat(columnExists("tbl_problem_ranks", "sort_order")).isFalse();
+        } finally {
+            jdbcTemplate.execute("alter table tbl_problem_ranks drop column if exists sort_order");
+        }
+    }
+
+    @Test
     void 예전_LEVEL_문자열을_같은_순서의_문제_랭크로_옮긴다() {
         Problem problem = problemRepository.save(Problem.builder()
             .title("migration-" + UUID.randomUUID())

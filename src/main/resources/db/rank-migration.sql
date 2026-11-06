@@ -32,16 +32,19 @@ INSERT INTO tbl_user_ranks (name, score) VALUES
 ON CONFLICT (name) DO NOTHING@@
 
 
+-- 난이도 순서는 XP로 정하기로 해서 예전에 만든 순서 컬럼을 지운다. 남아 있으면 NOT NULL 때문에 시드가 들어가지 않는다
+ALTER TABLE tbl_problem_ranks DROP COLUMN IF EXISTS sort_order@@
+
 -- 이미 있는 문제 랭크는 DB에서 조정한 값을 존중해 덮어쓰지 않는다
-INSERT INTO tbl_problem_ranks (name, xp, sort_order) VALUES
-    ('이슬', 10, 1),
-    ('물 한 컵', 20, 2),
-    ('물 한 병', 30, 3),
-    ('물 한 통', 50, 4),
-    ('비', 80, 5)
+INSERT INTO tbl_problem_ranks (name, xp) VALUES
+    ('이슬', 10),
+    ('물 한 컵', 20),
+    ('물 한 병', 30),
+    ('물 한 통', 50),
+    ('비', 80)
 ON CONFLICT (name) DO NOTHING@@
 
--- 예전 LEVEL_n 문자열을 같은 순서(sort_order)의 문제 랭크로 옮긴다.
+-- 예전 LEVEL_n 문자열을 같은 단계의 문제 랭크로 이름으로 옮긴다.
 -- Hibernate가 NOT NULL 컬럼 추가에 실패했을 수도, 이미 추가했을 수도 있어서 둘 다 처리한다
 DO $$
 BEGIN
@@ -53,7 +56,13 @@ BEGIN
         END IF;
         UPDATE tbl_problems p SET problem_rank_id = r.problem_rank_id
         FROM tbl_problem_ranks r
-        WHERE r.sort_order = substring(p.problem_rank from 'LEVEL_(\d+)')::int;
+        WHERE r.name = CASE p.problem_rank
+            WHEN 'LEVEL_1' THEN '이슬'
+            WHEN 'LEVEL_2' THEN '물 한 컵'
+            WHEN 'LEVEL_3' THEN '물 한 병'
+            WHEN 'LEVEL_4' THEN '물 한 통'
+            WHEN 'LEVEL_5' THEN '비'
+        END;
         ALTER TABLE tbl_problems ALTER COLUMN problem_rank_id SET NOT NULL;
         ALTER TABLE tbl_problems DROP COLUMN problem_rank;
     END IF;

@@ -7,15 +7,13 @@ import lombok.Builder;
 public record ProblemRankResponse(
     Long problemRankId,
     String name,
-    Long xp,
-    Integer sortOrder
+    Long xp
 ) {
     public static ProblemRankResponse from(ProblemRank rank) {
         return ProblemRankResponse.builder()
             .problemRankId(rank.getProblemRankId())
             .name(rank.getName())
             .xp(rank.getXp())
-            .sortOrder(rank.getSortOrder())
             .build();
     }
 }
