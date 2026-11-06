@@ -1,9 +1,9 @@
 package com.example.zukbambe.domain.solution.service;
 
 import com.example.zukbambe.domain.problem.domain.Problem;
-import com.example.zukbambe.domain.problem.domain.enums.ProblemRank;
 import com.example.zukbambe.domain.problem.domain.repository.ProblemRepository;
 import com.example.zukbambe.domain.rank.domain.UserRank;
+import com.example.zukbambe.domain.rank.domain.repository.ProblemRankRepository;
 import com.example.zukbambe.domain.rank.domain.repository.UserRankRepository;
 import com.example.zukbambe.domain.solution.domain.Solution;
 import com.example.zukbambe.domain.solution.domain.enums.Language;
@@ -77,6 +77,8 @@ class GradeSolutionFlowTest {
     @Autowired
     private UserRankRepository userRankRepository;
     @Autowired
+    private ProblemRankRepository problemRankRepository;
+    @Autowired
     private ProblemRepository problemRepository;
     @Autowired
     private TestCaseRepository testCaseRepository;
@@ -101,7 +103,7 @@ class GradeSolutionFlowTest {
             .content("content")
             .timeLimit(1.5)
             .memoryLimit(131072L)
-            .rank(ProblemRank.LEVEL_1)
+            .rank(problemRankRepository.findByName("이슬").orElseThrow())
             .build());
         testCaseRepository.saveAll(List.of(
             TestCase.of(problem, "1 2", "3", true),

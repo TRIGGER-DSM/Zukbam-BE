@@ -1,6 +1,9 @@
 package com.example.zukbambe.global.config;
 
+import com.example.zukbambe.domain.problem.domain.Problem;
+import com.example.zukbambe.domain.problem.domain.repository.ProblemRepository;
 import com.example.zukbambe.domain.rank.domain.UserRank;
+import com.example.zukbambe.domain.rank.domain.repository.ProblemRankRepository;
 import com.example.zukbambe.domain.rank.domain.repository.UserRankRepository;
 import com.example.zukbambe.domain.user.domain.User;
 import com.example.zukbambe.domain.user.domain.enums.Role;
@@ -25,6 +28,12 @@ class RankMigrationScriptTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ProblemRankRepository problemRankRepository;
+
+    @Autowired
+    private ProblemRepository problemRepository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -79,6 +88,45 @@ class RankMigrationScriptTest {
                 jdbcTemplate.execute("alter table tbl_users rename column score to xp");
             }
             userRepository.deleteById(user.getUserId());
+        }
+    }
+
+    @Test
+    void 스크립트를_다시_실행해도_문제_랭크가_중복되지_않는다() {
+        runRankMigrationScript();
+        assertThat(jdbcTemplate.queryForObject("select count(*) from tbl_problem_ranks", Long.class)).isEqualTo(5);
+        assertThat(problemRankRepository.findByName("비")).get().extracting(r -> r.getXp()).isEqualTo(80L);
+    }
+
+    @Test
+    void 예전_LEVEL_문자열을_같은_순서의_문제_랭크로_옮긴다() {
+        Problem problem = problemRepository.save(Problem.builder()
+            .title("migration-" + UUID.randomUUID())
+            .content("content")
+            .timeLimit(1.5)
+            .memoryLimit(131072L)
+            .rank(problemRankRepository.findByName("이슬").orElseThrow())
+            .build());
+        try {
+            // 예전 스키마 재현. 다른 테스트의 문제도 not null을 만족하도록 LEVEL_1로 채운다
+            jdbcTemplate.execute("alter table tbl_problems drop column problem_rank_id");
+            jdbcTemplate.execute("alter table tbl_problems add column problem_rank varchar(255)");
+            jdbcTemplate.update("update tbl_problems set problem_rank = 'LEVEL_1'");
+            jdbcTemplate.update("update tbl_problems set problem_rank = 'LEVEL_3' where problem_id = ?", problem.getProblemId());
+
+            runRankMigrationScript();
+
+            assertThat(jdbcTemplate.queryForObject(
+                "select r.name from tbl_problems p join tbl_problem_ranks r on r.problem_rank_id = p.problem_rank_id where p.problem_id = ?",
+                String.class, problem.getProblemId())).isEqualTo("물 한 병");
+            assertThat(columnExists("tbl_problems", "problem_rank")).isFalse();
+            assertThat(jdbcTemplate.queryForObject(
+                "select is_nullable from information_schema.columns where table_schema = current_schema() and table_name = 'tbl_problems' and column_name = 'problem_rank_id'",
+                String.class)).isEqualTo("NO");
+            assertThat(jdbcTemplate.queryForObject(
+                "select count(*) from pg_constraint where conname = 'fk_problems_problem_rank'", Long.class)).isEqualTo(1);
+        } finally {
+            problemRepository.deleteById(problem.getProblemId());
         }
     }
 

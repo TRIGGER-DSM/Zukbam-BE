@@ -1,6 +1,5 @@
 package com.example.zukbambe.domain.problem.presentation.dto.request;
 
-import com.example.zukbambe.domain.problem.domain.enums.ProblemRank;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -27,7 +26,7 @@ public record ProblemRequest(
     Double timeLimit,
 
     @NotNull(message = "난이도는 필수입니다.")
-    ProblemRank rank,
+    Long problemRankId,
 
     @NotEmpty(message = "테스트케이스는 1개 이상이어야 합니다.")
     @Valid

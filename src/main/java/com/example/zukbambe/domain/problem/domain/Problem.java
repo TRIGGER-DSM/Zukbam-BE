@@ -1,6 +1,6 @@
 package com.example.zukbambe.domain.problem.domain;
 
-import com.example.zukbambe.domain.problem.domain.enums.ProblemRank;
+import com.example.zukbambe.domain.rank.domain.ProblemRank;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -27,8 +27,8 @@ public class Problem {
     @Column(nullable = false, name = "time_limit")
     private Double timeLimit;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, name = "problem_rank")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "problem_rank_id", foreignKey = @ForeignKey(name = "fk_problems_problem_rank"))
     private ProblemRank rank;
 
     public void update(String title, String content, Long memoryLimit, Double timeLimit, ProblemRank rank) {

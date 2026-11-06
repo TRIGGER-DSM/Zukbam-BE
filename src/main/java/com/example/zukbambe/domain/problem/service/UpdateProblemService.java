@@ -7,6 +7,7 @@ import com.example.zukbambe.domain.problem.facade.ProblemFacade;
 import com.example.zukbambe.domain.problem.presentation.dto.request.ProblemRequest;
 import com.example.zukbambe.domain.testcase.domain.TestCase;
 import com.example.zukbambe.domain.testcase.domain.repository.TestCaseRepository;
+import com.example.zukbambe.domain.rank.facade.ProblemRankFacade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ public class UpdateProblemService {
     private final ProblemFacade problemFacade;
     private final ProblemRepository problemRepository;
     private final TestCaseRepository testCaseRepository;
+    private final ProblemRankFacade problemRankFacade;
 
     @Transactional
     public void execute(Long problemId, ProblemRequest request) {
@@ -32,7 +34,7 @@ public class UpdateProblemService {
             request.content(),
             request.memoryLimit(),
             request.timeLimit(),
-            request.rank()
+            problemRankFacade.getProblemRankById(request.problemRankId())
         );
 
         testCaseRepository.deleteAllByProblem(problem);
