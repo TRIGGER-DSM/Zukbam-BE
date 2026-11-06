@@ -11,4 +11,6 @@ public interface ProblemRankRepository extends JpaRepository<ProblemRank, Long> 
 
     // 난이도 순서는 XP 순서와 같다
     List<ProblemRank> findAllByOrderByXpAscProblemRankIdAsc();
+
+    boolean existsByNameAndProblemRankIdNot(String name, Long problemRankId);
 }

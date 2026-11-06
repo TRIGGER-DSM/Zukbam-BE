@@ -45,4 +45,28 @@ public interface UserRepository extends JpaRepository<User, Long> {
         nativeQuery = true
     )
     int addXpToProblemSolvers(@Param("problemId") Long problemId, @Param("amount") long amount);
+
+    // 그 랭크 문제를 푼 개수만큼 차액을 곱해서 더한다
+    @Modifying
+    @Query(
+        value = """
+            update tbl_users u
+            set xp = u.xp + :amount * c.solved_count,
+                user_rank_id = (
+                    select r.user_rank_id from tbl_user_ranks r
+                    where r.score <= u.xp + :amount * c.solved_count
+                    order by r.score desc limit 1
+                )
+            from (
+                select sh.user_id, count(*) as solved_count
+                from tbl_solved_histories sh
+                join tbl_problems p on p.problem_id = sh.problem_id
+                where p.problem_rank_id = :problemRankId
+                group by sh.user_id
+            ) c
+            where c.user_id = u.user_id
+            """,
+        nativeQuery = true
+    )
+    int addXpToProblemRankSolvers(@Param("problemRankId") Long problemRankId, @Param("amount") long amount);
 }

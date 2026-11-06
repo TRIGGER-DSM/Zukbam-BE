@@ -32,4 +32,23 @@ public interface XpHistoryRepository extends JpaRepository<XpHistory, Long> {
         @Param("reason") String reason,
         @Param("createdAt") LocalDateTime createdAt
     );
+
+    // 같은 랭크 문제를 여러 개 풀었으면 푼 문제마다 한 줄씩 남긴다
+    @Modifying
+    @Query(
+        value = """
+            insert into tbl_xp_histories (user_id, amount, reason, problem_id, problem_title, created_at)
+            select sh.user_id, :amount, :reason, p.problem_id, p.title, :createdAt
+            from tbl_solved_histories sh
+            join tbl_problems p on p.problem_id = sh.problem_id
+            where p.problem_rank_id = :problemRankId
+            """,
+        nativeQuery = true
+    )
+    int insertForProblemRankSolvers(
+        @Param("problemRankId") Long problemRankId,
+        @Param("amount") long amount,
+        @Param("reason") String reason,
+        @Param("createdAt") LocalDateTime createdAt
+    );
 }
