@@ -18,6 +18,7 @@ public class UserRank {
     @Column(nullable = false, name = "name")
     private String name;
 
-    @Column(nullable = false, name = "score")
-    private Integer score;
+    // 이 랭크가 되기 위해 필요한 XP
+    @Column(nullable = false, name = "xp")
+    private Integer xp;
 }

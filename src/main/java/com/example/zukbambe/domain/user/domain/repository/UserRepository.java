@@ -18,11 +18,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(
         value = """
             update tbl_users
-            set xp = xp + :amount,
+            set xp = tbl_users.xp + :amount,
                 user_rank_id = (
                     select r.user_rank_id from tbl_user_ranks r
-                    where r.score <= xp + :amount
-                    order by r.score desc limit 1
+                    where r.xp <= tbl_users.xp + :amount
+                    order by r.xp desc limit 1
                 )
             where user_id = :userId
             """,
@@ -34,11 +34,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(
         value = """
             update tbl_users
-            set xp = xp + :amount,
+            set xp = tbl_users.xp + :amount,
                 user_rank_id = (
                     select r.user_rank_id from tbl_user_ranks r
-                    where r.score <= xp + :amount
-                    order by r.score desc limit 1
+                    where r.xp <= tbl_users.xp + :amount
+                    order by r.xp desc limit 1
                 )
             where user_id in (select sh.user_id from tbl_solved_histories sh where sh.problem_id = :problemId)
             """,
@@ -54,8 +54,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
             set xp = u.xp + :amount * c.solved_count,
                 user_rank_id = (
                     select r.user_rank_id from tbl_user_ranks r
-                    where r.score <= u.xp + :amount * c.solved_count
-                    order by r.score desc limit 1
+                    where r.xp <= u.xp + :amount * c.solved_count
+                    order by r.xp desc limit 1
                 )
             from (
                 select sh.user_id, count(*) as solved_count
@@ -78,8 +78,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
             set xp = t.total,
                 user_rank_id = (
                     select r.user_rank_id from tbl_user_ranks r
-                    where r.score <= t.total
-                    order by r.score desc limit 1
+                    where r.xp <= t.total
+                    order by r.xp desc limit 1
                 )
             from (
                 select coalesce(sum(h.amount), 0) as total
@@ -99,8 +99,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
             set xp = t.total,
                 user_rank_id = (
                     select r.user_rank_id from tbl_user_ranks r
-                    where r.score <= t.total
-                    order by r.score desc limit 1
+                    where r.xp <= t.total
+                    order by r.xp desc limit 1
                 )
             from (
                 select u2.user_id, coalesce(sum(h.amount), 0) as total

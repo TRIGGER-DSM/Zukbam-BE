@@ -89,7 +89,7 @@ class GradeSolutionFlowTest {
     @BeforeEach
     void setUp() {
         String unique = UUID.randomUUID().toString().substring(0, 8);
-        UserRank rank = userRankRepository.save(UserRank.builder().name("rank-" + unique).score(0).build());
+        UserRank rank = userRankRepository.save(UserRank.builder().name("rank-" + unique).xp(0).build());
         user = userRepository.save(User.builder()
             .email(unique + "@dsm.hs.kr")
             .password("password")

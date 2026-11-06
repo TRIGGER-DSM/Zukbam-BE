@@ -43,25 +43,25 @@ class RankMigrationScriptTest {
 
     @Test
     void 유저_랭크_7개가_필요_XP와_함께_들어간다() {
-        assertThat(userRankRepository.findByName("죽순")).get().extracting(UserRank::getScore).isEqualTo(0);
-        assertThat(userRankRepository.findByName("대나무 1m")).get().extracting(UserRank::getScore).isEqualTo(100);
-        assertThat(userRankRepository.findByName("대나무 3m")).get().extracting(UserRank::getScore).isEqualTo(300);
-        assertThat(userRankRepository.findByName("대나무 5m")).get().extracting(UserRank::getScore).isEqualTo(600);
-        assertThat(userRankRepository.findByName("대나무 10m")).get().extracting(UserRank::getScore).isEqualTo(1600);
-        assertThat(userRankRepository.findByName("금죽")).get().extracting(UserRank::getScore).isEqualTo(3000);
-        assertThat(userRankRepository.findByName("오죽")).get().extracting(UserRank::getScore).isEqualTo(5000);
+        assertThat(userRankRepository.findByName("죽순")).get().extracting(UserRank::getXp).isEqualTo(0);
+        assertThat(userRankRepository.findByName("대나무 1m")).get().extracting(UserRank::getXp).isEqualTo(100);
+        assertThat(userRankRepository.findByName("대나무 3m")).get().extracting(UserRank::getXp).isEqualTo(300);
+        assertThat(userRankRepository.findByName("대나무 5m")).get().extracting(UserRank::getXp).isEqualTo(600);
+        assertThat(userRankRepository.findByName("대나무 10m")).get().extracting(UserRank::getXp).isEqualTo(1600);
+        assertThat(userRankRepository.findByName("금죽")).get().extracting(UserRank::getXp).isEqualTo(3000);
+        assertThat(userRankRepository.findByName("오죽")).get().extracting(UserRank::getXp).isEqualTo(5000);
     }
 
     @Test
     void 스크립트를_다시_실행해도_중복되거나_DB에서_바꾼_값이_덮어써지지_않는다() {
         try {
-            jdbcTemplate.update("update tbl_user_ranks set score = 700 where name = '대나무 5m'");
+            jdbcTemplate.update("update tbl_user_ranks set xp = 700 where name = '대나무 5m'");
             runRankMigrationScript();
             assertThat(jdbcTemplate.queryForObject("select count(*) from tbl_user_ranks where name = '대나무 5m'", Long.class)).isEqualTo(1);
-            assertThat(userRankRepository.findByName("대나무 5m")).get().extracting(UserRank::getScore).isEqualTo(700);
+            assertThat(userRankRepository.findByName("대나무 5m")).get().extracting(UserRank::getXp).isEqualTo(700);
         } finally {
             // 다른 테스트가 같은 DB를 쓰므로 원래 값으로 되돌린다
-            jdbcTemplate.update("update tbl_user_ranks set score = 600 where name = '대나무 5m'");
+            jdbcTemplate.update("update tbl_user_ranks set xp = 600 where name = '대나무 5m'");
         }
     }
 
@@ -88,6 +88,24 @@ class RankMigrationScriptTest {
                 jdbcTemplate.execute("alter table tbl_users rename column score to xp");
             }
             userRepository.deleteById(user.getUserId());
+        }
+    }
+
+    @Test
+    void 유저_랭크에_예전_score_컬럼이_남아_있으면_xp로_옮긴다() {
+        try {
+            jdbcTemplate.execute("alter table tbl_user_ranks rename column xp to score");
+            jdbcTemplate.update("update tbl_user_ranks set score = 650 where name = '대나무 5m'");
+
+            runRankMigrationScript();
+
+            assertThat(columnExists("tbl_user_ranks", "score")).isFalse();
+            assertThat(userRankRepository.findByName("대나무 5m")).get().extracting(UserRank::getXp).isEqualTo(650);
+        } finally {
+            if (!columnExists("tbl_user_ranks", "xp")) {
+                jdbcTemplate.execute("alter table tbl_user_ranks rename column score to xp");
+            }
+            jdbcTemplate.update("update tbl_user_ranks set xp = 600 where name = '대나무 5m'");
         }
     }
 
