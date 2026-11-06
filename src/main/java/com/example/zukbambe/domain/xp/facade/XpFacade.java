@@ -1,0 +1,34 @@
+package com.example.zukbambe.domain.xp.facade;
+
+import com.example.zukbambe.domain.problem.domain.Problem;
+import com.example.zukbambe.domain.user.domain.User;
+import com.example.zukbambe.domain.user.domain.repository.UserRepository;
+import com.example.zukbambe.domain.xp.domain.XpHistory;
+import com.example.zukbambe.domain.xp.domain.repository.XpHistoryRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Clock;
+import java.time.LocalDateTime;
+
+@Component
+@RequiredArgsConstructor
+public class XpFacade {
+
+    private static final String SOLVE_REASON = "문제 풀이";
+
+    private final XpHistoryRepository xpHistoryRepository;
+    private final UserRepository userRepository;
+    private final Clock clock;
+
+    // 지급량은 그 시점 문제 랭크 기준으로 기록한다. 나중에 랭크가 바뀌면 보상 이벤트로 맞춘다
+    @Transactional
+    public void grantForSolve(User user, Problem problem) {
+        long amount = problem.getRank().getXp();
+        xpHistoryRepository.save(XpHistory.of(
+            user, amount, SOLVE_REASON, problem.getProblemId(), problem.getTitle(), LocalDateTime.now(clock)
+        ));
+        userRepository.addXp(user.getUserId(), amount);
+    }
+}

@@ -131,6 +131,7 @@ class GradeSolutionFlowTest {
         assertThat(solution.getMemoryUsed()).isEqualTo(3000L);
         assertThat(solvedHistoryRepository.existsById(new SolvedHistoryId(user.getUserId(), problem.getProblemId()))).isTrue();
         assertThat(streakRepository.findById(user.getUserId()).orElseThrow().getMaxStreak()).isEqualTo(1);
+        assertThat(userRepository.findById(user.getUserId()).orElseThrow().getXp()).isEqualTo(10L);
 
         ArgumentCaptor<JudgeRequest> captor = ArgumentCaptor.forClass(JudgeRequest.class);
         verify(judgeProvider).judge(captor.capture());
