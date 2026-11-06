@@ -1,7 +1,7 @@
 package com.example.zukbambe.domain.problem.presentation.dto.response;
 
 import com.example.zukbambe.domain.problem.domain.Problem;
-import com.example.zukbambe.domain.problem.domain.enums.ProblemRank;
+import com.example.zukbambe.domain.rank.presentation.dto.response.ProblemRankResponse;
 import com.example.zukbambe.domain.testcase.domain.TestCase;
 import lombok.Builder;
 
@@ -14,7 +14,7 @@ public record ProblemDetailResponse(
     String content,
     Long memoryLimit,
     Double timeLimit,
-    ProblemRank rank,
+    ProblemRankResponse rank,
     List<TestCaseResponse> testCases
 ) {
     public static ProblemDetailResponse of(Problem problem, List<TestCase> testCases) {
@@ -24,7 +24,7 @@ public record ProblemDetailResponse(
             .content(problem.getContent())
             .memoryLimit(problem.getMemoryLimit())
             .timeLimit(problem.getTimeLimit())
-            .rank(problem.getRank())
+            .rank(ProblemRankResponse.from(problem.getRank()))
             .testCases(testCases.stream().map(TestCaseResponse::from).toList())
             .build();
     }

@@ -7,6 +7,7 @@ import com.example.zukbambe.domain.solution.exception.SolutionNotFoundException;
 import com.example.zukbambe.domain.solution.service.dto.GradedSolution;
 import com.example.zukbambe.domain.solvedhistory.domain.repository.SolvedHistoryRepository;
 import com.example.zukbambe.domain.streak.facade.StreakFacade;
+import com.example.zukbambe.domain.xp.facade.XpFacade;
 import com.example.zukbambe.global.judge.dto.JudgeResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ public class ApplyGradingResultService {
     private final SolutionRepository solutionRepository;
     private final SolvedHistoryRepository solvedHistoryRepository;
     private final StreakFacade streakFacade;
+    private final XpFacade xpFacade;
     private final Clock clock;
 
     // 제출 트랜잭션의 커밋 이후에도 불릴 수 있어서 항상 새 트랜잭션으로 반영한다
@@ -41,6 +43,7 @@ public class ApplyGradingResultService {
             );
             if (inserted == 1) {
                 streakFacade.recordSolved(solution.getUser());
+                xpFacade.grantForSolve(solution.getUser(), solution.getProblem());
             }
         }
 

@@ -1,9 +1,9 @@
 package com.example.zukbambe.domain.solution.service;
 
 import com.example.zukbambe.domain.problem.domain.Problem;
-import com.example.zukbambe.domain.problem.domain.enums.ProblemRank;
 import com.example.zukbambe.domain.problem.domain.repository.ProblemRepository;
 import com.example.zukbambe.domain.rank.domain.UserRank;
+import com.example.zukbambe.domain.rank.domain.repository.ProblemRankRepository;
 import com.example.zukbambe.domain.rank.domain.repository.UserRankRepository;
 import com.example.zukbambe.domain.solution.domain.Solution;
 import com.example.zukbambe.domain.solution.domain.enums.Language;
@@ -77,6 +77,8 @@ class GradeSolutionFlowTest {
     @Autowired
     private UserRankRepository userRankRepository;
     @Autowired
+    private ProblemRankRepository problemRankRepository;
+    @Autowired
     private ProblemRepository problemRepository;
     @Autowired
     private TestCaseRepository testCaseRepository;
@@ -87,7 +89,7 @@ class GradeSolutionFlowTest {
     @BeforeEach
     void setUp() {
         String unique = UUID.randomUUID().toString().substring(0, 8);
-        UserRank rank = userRankRepository.save(UserRank.builder().name("rank-" + unique).score(0).build());
+        UserRank rank = userRankRepository.save(UserRank.builder().name("rank-" + unique).xp(0).build());
         user = userRepository.save(User.builder()
             .email(unique + "@dsm.hs.kr")
             .password("password")
@@ -101,7 +103,7 @@ class GradeSolutionFlowTest {
             .content("content")
             .timeLimit(1.5)
             .memoryLimit(131072L)
-            .rank(ProblemRank.LEVEL_1)
+            .rank(problemRankRepository.findByName("이슬").orElseThrow())
             .build());
         testCaseRepository.saveAll(List.of(
             TestCase.of(problem, "1 2", "3", true),
@@ -129,6 +131,7 @@ class GradeSolutionFlowTest {
         assertThat(solution.getMemoryUsed()).isEqualTo(3000L);
         assertThat(solvedHistoryRepository.existsById(new SolvedHistoryId(user.getUserId(), problem.getProblemId()))).isTrue();
         assertThat(streakRepository.findById(user.getUserId()).orElseThrow().getMaxStreak()).isEqualTo(1);
+        assertThat(userRepository.findById(user.getUserId()).orElseThrow().getXp()).isEqualTo(10L);
 
         ArgumentCaptor<JudgeRequest> captor = ArgumentCaptor.forClass(JudgeRequest.class);
         verify(judgeProvider).judge(captor.capture());

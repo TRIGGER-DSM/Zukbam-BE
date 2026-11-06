@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Service
 public class StudentSignUpService {
-    private static final String DEFAULT_RANK_NAME = "Unranked";
+    private static final String DEFAULT_RANK_NAME = "죽순";
 
     private final UserRepository userRepository;
     private final StudentRepository studentRepository;

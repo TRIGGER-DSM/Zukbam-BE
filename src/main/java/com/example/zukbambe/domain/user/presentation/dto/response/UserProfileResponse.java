@@ -10,7 +10,7 @@ public record UserProfileResponse(
     String email,
     String name,
     Role role,
-    Long score,
+    Long xp,
     String rank,
     long solvedCount,
     StudentInfoResponse student
@@ -21,7 +21,7 @@ public record UserProfileResponse(
             .email(user.getEmail())
             .name(user.getName())
             .role(user.getRole())
-            .score(user.getScore())
+            .xp(user.getXp())
             .rank(user.getRank().getName())
             .solvedCount(solvedCount)
             .student(student)
