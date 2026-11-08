@@ -17,7 +17,8 @@ public class WebSecurityConfig {
         configuration.setAllowedOrigins(List.of(
             "http://localhost:3000",
             "http://localhost:5173",
-            "https://zukbam-fe.yeonjaecho09.workers.dev"
+            "https://zukbam-fe.yeonjaecho09.workers.dev",
+            "https://zukbam-fe-proto.yeonjaecho09.workers.dev"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
