@@ -45,6 +45,10 @@ spring:
           timeout: 5000
           writetimeout: 5000
 
+# HTTPS 프록시 뒤에서 원래 요청의 스킴·호스트를 X-Forwarded-* 헤더로 인식한다 (Swagger 서버 주소가 http로 잡히지 않도록)
+server:
+  forward-headers-strategy: framework
+
 springdoc:
   api-docs:
     enabled: ${SWAGGER_ENABLED:true}
