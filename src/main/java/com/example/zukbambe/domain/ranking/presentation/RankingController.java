@@ -22,7 +22,7 @@ public class RankingController {
 
     private final QueryRankingListService queryRankingListService;
 
-    @Operation(summary = "랭킹 조회", description = "매일 새벽 3시에 만든 스냅샷 기준이다. 스트릭은 기간과 관계없이 전체 기준으로 응답한다.")
+    @Operation(summary = "랭킹 조회", description = "조회 시점 기준으로 바로 집계한다. 스트릭은 기간과 관계없이 전체 기준으로 응답한다.")
     @GetMapping
     public RankingListResponse getRankings(
         @RequestParam(defaultValue = "XP") RankingMetric metric,

@@ -91,26 +91,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
         nativeQuery = true
     )
     int recalculateXp(@Param("userId") Long userId);
-
-    @Modifying
-    @Query(
-        value = """
-            update tbl_users u
-            set xp = t.total,
-                user_rank_id = (
-                    select r.user_rank_id from tbl_user_ranks r
-                    where r.xp <= t.total
-                    order by r.xp desc limit 1
-                )
-            from (
-                select u2.user_id, coalesce(sum(h.amount), 0) as total
-                from tbl_users u2
-                left join tbl_xp_histories h on h.user_id = u2.user_id
-                group by u2.user_id
-            ) t
-            where t.user_id = u.user_id
-            """,
-        nativeQuery = true
-    )
-    int recalculateAllXp();
 }

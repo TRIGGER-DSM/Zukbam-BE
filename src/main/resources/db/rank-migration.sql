@@ -90,3 +90,6 @@ BEGIN
             FOREIGN KEY (problem_rank_id) REFERENCES tbl_problem_ranks (problem_rank_id);
     END IF;
 END $$@@
+
+-- 랭킹을 조회할 때마다 바로 집계하기로 해서 예전 스냅샷 테이블을 지운다
+DROP TABLE IF EXISTS tbl_ranking_snapshots@@

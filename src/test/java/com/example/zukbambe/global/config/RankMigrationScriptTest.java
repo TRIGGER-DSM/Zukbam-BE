@@ -128,6 +128,19 @@ class RankMigrationScriptTest {
     }
 
     @Test
+    void 예전_랭킹_스냅샷_테이블이_남아_있으면_지운다() {
+        try {
+            jdbcTemplate.execute("create table if not exists tbl_ranking_snapshots (id bigint primary key)");
+            runRankMigrationScript();
+            assertThat(jdbcTemplate.queryForObject(
+                "select count(*) from information_schema.tables where table_schema = current_schema() and table_name = 'tbl_ranking_snapshots'",
+                Long.class)).isZero();
+        } finally {
+            jdbcTemplate.execute("drop table if exists tbl_ranking_snapshots");
+        }
+    }
+
+    @Test
     void 예전_LEVEL_문자열을_같은_순서의_문제_랭크로_옮긴다() {
         Problem problem = problemRepository.save(Problem.builder()
             .title("migration-" + UUID.randomUUID())
