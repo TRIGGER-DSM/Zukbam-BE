@@ -27,7 +27,7 @@ public class XpController {
 
     /**
      * 유저 XP 내역 조회<p>
-     * XP가 지급되거나 차감된 내역을 최신순으로 조회한다.
+     * XP를 받거나 깎인 내역을 최신순으로 보여준다.
      */
     @GetMapping("/{userId}/xp-histories")
     public XpHistoryListResponse getXpHistories(
@@ -40,7 +40,7 @@ public class XpController {
 
     /**
      * 내 XP 재계산<p>
-     * XP 내역 합계로 내 XP와 랭크를 다시 맞춘다.
+     * XP 내역을 모두 더한 값으로 내 XP와 랭크를 다시 맞춘다.
      */
     @PostMapping("/me/xp/recalculate")
     @ResponseStatus(HttpStatus.NO_CONTENT)

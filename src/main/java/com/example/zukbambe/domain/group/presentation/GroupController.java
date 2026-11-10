@@ -48,7 +48,7 @@ public class GroupController {
 
     /**
      * 그룹 생성<p>
-     * 생성한 유저가 그룹장이 된다. 생성된 그룹 경로는 Location 헤더로 반환한다.
+     * 만든 사람이 그룹장이 된다. 생성된 그룹 경로는 Location 헤더로 반환한다.
      */
     @ApiResponse(responseCode = "201")
     @PostMapping
@@ -59,7 +59,7 @@ public class GroupController {
 
     /**
      * 내 그룹 목록 조회<p>
-     * 내가 가입한 그룹을 최근에 가입한 순으로 조회한다.
+     * 내가 가입한 그룹을 최근에 가입한 순서로 보여준다.
      */
     @GetMapping("/me")
     public GroupListResponse getMyGroups() {
@@ -68,7 +68,7 @@ public class GroupController {
 
     /**
      * 그룹 상세 조회<p>
-     * 그룹 멤버만 조회할 수 있다. 멤버 목록은 가입한 순으로 응답한다.
+     * 그룹 멤버만 볼 수 있다. 멤버 목록은 가입한 순서대로 나온다.
      */
     @GetMapping("/{groupId}")
     public GroupDetailResponse getGroup(@PathVariable Long groupId) {
@@ -87,7 +87,7 @@ public class GroupController {
 
     /**
      * 그룹 삭제<p>
-     * 그룹장만 삭제할 수 있다. 그룹의 멤버와 초대도 함께 삭제된다.
+     * 그룹장만 삭제할 수 있다. 그룹의 멤버와 초대도 같이 지워진다.
      */
     @DeleteMapping("/{groupId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -97,8 +97,8 @@ public class GroupController {
 
     /**
      * 그룹장 위임<p>
-     * 그룹장만 할 수 있고, 같은 그룹의 멤버에게만 위임할 수 있다.
-     * 기존 그룹장은 일반 멤버가 된다.
+     * 그룹장만 할 수 있고, 같은 그룹 멤버에게만 넘길 수 있다.
+     * 넘겨준 그룹장은 일반 멤버가 된다.
      */
     @PatchMapping("/{groupId}/owner")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -118,7 +118,7 @@ public class GroupController {
 
     /**
      * 그룹 멤버 내보내기<p>
-     * 그룹장만 할 수 있다. 그룹장 자신은 내보낼 수 없다.
+     * 그룹장만 할 수 있다. 그룹장 본인은 내보낼 수 없다.
      */
     @DeleteMapping("/{groupId}/members/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

@@ -43,7 +43,7 @@ public class ProblemController {
 
     /**
      * 문제 생성<p>
-     * TEACHER 권한 필요. 제목은 중복될 수 없고 테스트케이스는 1개 이상이어야 한다.
+     * TEACHER 권한 필요. 이미 있는 제목은 쓸 수 없고 테스트케이스가 1개 이상 있어야 한다.
      * 생성된 문제 경로는 Location 헤더로 반환한다.
      */
     @ApiResponse(responseCode = "201")
@@ -56,7 +56,7 @@ public class ProblemController {
 
     /**
      * 문제 목록 조회<p>
-     * 로그인하지 않아도 조회할 수 있다. 문제 번호순으로 조회한다.
+     * 로그인하지 않아도 볼 수 있다. 문제 번호순으로 나온다.
      */
     @GetMapping
     public ProblemListResponse getProblems(
@@ -68,8 +68,8 @@ public class ProblemController {
 
     /**
      * 문제 상세 조회<p>
-     * 로그인하지 않아도 조회할 수 있다.
-     * 예제 테스트케이스만 응답하며, 선생님에게는 채점용 테스트케이스도 함께 응답한다.
+     * 로그인하지 않아도 볼 수 있다.
+     * 예제 테스트케이스만 내려주고, 선생님에게는 채점용 테스트케이스까지 내려준다.
      */
     @GetMapping("/{problemId}")
     public ProblemDetailResponse getProblem(@PathVariable Long problemId) {
@@ -78,8 +78,8 @@ public class ProblemController {
 
     /**
      * 문제 수정<p>
-     * TEACHER 권한 필요. 테스트케이스는 요청한 내용으로 모두 교체된다.
-     * 문제 랭크가 바뀌면 이미 푼 유저의 XP에 차액을 반영한다.
+     * TEACHER 권한 필요. 테스트케이스는 요청에 담긴 것으로 전부 바뀐다.
+     * 문제 랭크를 바꾸면 이미 푼 유저의 XP도 차이만큼 조정된다.
      */
     @PutMapping("/{problemId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -92,7 +92,7 @@ public class ProblemController {
 
     /**
      * 문제 삭제<p>
-     * TEACHER 권한 필요. 문제의 테스트케이스도 함께 삭제된다.
+     * TEACHER 권한 필요. 문제의 테스트케이스도 같이 지워진다.
      */
     @DeleteMapping("/{problemId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

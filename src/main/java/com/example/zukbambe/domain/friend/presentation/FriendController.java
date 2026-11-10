@@ -41,8 +41,8 @@ public class FriendController {
 
     /**
      * 친구 요청 보내기<p>
-     * 자기 자신이나 이미 친구인 유저에게는 보낼 수 없다.
-     * 두 유저 사이에 대기 중인 요청이 있으면 보낼 수 없다. 상대가 먼저 보낸 요청은 받은 친구 요청 목록에서 수락한다.
+     * 나 자신이나 이미 친구인 유저에게는 보낼 수 없다.
+     * 둘 사이에 대기 중인 요청이 있어도 보낼 수 없다. 상대가 먼저 보낸 요청이라면 받은 친구 요청 목록에서 수락하면 된다.
      */
     @PostMapping("/requests")
     @ResponseStatus(HttpStatus.CREATED)
@@ -52,7 +52,7 @@ public class FriendController {
 
     /**
      * 받은 친구 요청 목록 조회<p>
-     * 대기 중인 요청만 최신순으로 조회한다.
+     * 대기 중인 요청만 최신순으로 보여준다.
      */
     @GetMapping("/requests/received")
     public ReceivedFriendRequestListResponse getReceivedFriendRequests(
@@ -64,7 +64,7 @@ public class FriendController {
 
     /**
      * 친구 요청 수락<p>
-     * 내가 받은 대기 중인 요청만 수락할 수 있다.
+     * 내가 받은 요청 중 대기 중인 것만 수락할 수 있다.
      */
     @PatchMapping("/requests/{friendshipId}/accept")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -74,7 +74,7 @@ public class FriendController {
 
     /**
      * 친구 요청 거절<p>
-     * 내가 받은 대기 중인 요청만 거절할 수 있다. 거절한 뒤에도 다시 요청을 주고받을 수 있다.
+     * 내가 받은 요청 중 대기 중인 것만 거절할 수 있다. 거절해도 나중에 다시 요청을 주고받을 수 있다.
      */
     @PatchMapping("/requests/{friendshipId}/reject")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -84,7 +84,7 @@ public class FriendController {
 
     /**
      * 친구 목록 조회<p>
-     * 최근에 친구가 된 순으로 조회한다.
+     * 최근에 친구가 된 순서로 보여준다.
      */
     @GetMapping
     public FriendListResponse getFriends(
@@ -96,7 +96,7 @@ public class FriendController {
 
     /**
      * 친구 삭제<p>
-     * 친구 관계의 두 유저 중 누구나 삭제할 수 있다. 삭제하면 상대의 친구 목록에서도 사라진다.
+     * 두 사람 중 누구든 삭제할 수 있다. 삭제하면 상대 친구 목록에서도 빠진다.
      */
     @DeleteMapping("/{friendshipId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

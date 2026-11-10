@@ -34,8 +34,8 @@ public class GroupInvitationController {
 
     /**
      * 그룹 초대 보내기<p>
-     * 그룹 멤버라면 누구나 초대할 수 있다. 자기 자신이나 이미 멤버인 유저는 초대할 수 없다.
-     * 같은 유저에게 대기 중인 초대가 있으면 보낼 수 없다. 초대는 7일간 유효하다.
+     * 그룹 멤버면 누구나 초대할 수 있다. 나 자신이나 이미 멤버인 유저는 초대할 수 없다.
+     * 같은 유저에게 보낸 초대가 아직 대기 중이면 다시 보낼 수 없다. 초대는 7일 동안 유효하다.
      */
     @PostMapping("/{groupId}/invitations")
     @ResponseStatus(HttpStatus.CREATED)
@@ -45,7 +45,7 @@ public class GroupInvitationController {
 
     /**
      * 받은 그룹 초대 목록 조회<p>
-     * 대기 중인 초대만 최신순으로 조회한다. 만료된 초대는 제외한다.
+     * 대기 중인 초대만 최신순으로 보여준다. 만료된 초대는 빠진다.
      */
     @GetMapping("/invitations/received")
     public ReceivedGroupInvitationListResponse getReceivedGroupInvitations() {
@@ -54,7 +54,7 @@ public class GroupInvitationController {
 
     /**
      * 그룹 초대 수락<p>
-     * 내가 받은 대기 중인 초대만 수락할 수 있다. 수락하면 일반 멤버로 가입한다.
+     * 내가 받은 초대 중 대기 중인 것만 수락할 수 있다. 수락하면 일반 멤버로 가입된다.
      * 만료된 초대는 수락할 수 없다.
      */
     @PatchMapping("/invitations/{invitationId}/accept")
@@ -65,7 +65,7 @@ public class GroupInvitationController {
 
     /**
      * 그룹 초대 거절<p>
-     * 내가 받은 대기 중인 초대만 거절할 수 있다.
+     * 내가 받은 초대 중 대기 중인 것만 거절할 수 있다.
      */
     @PatchMapping("/invitations/{invitationId}/reject")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -75,7 +75,7 @@ public class GroupInvitationController {
 
     /**
      * 그룹 초대 취소<p>
-     * 초대를 보낸 유저만 대기 중인 초대를 취소할 수 있다.
+     * 초대를 보낸 사람만 취소할 수 있고, 대기 중인 초대만 취소된다.
      */
     @PatchMapping("/invitations/{invitationId}/cancel")
     @ResponseStatus(HttpStatus.NO_CONTENT)
