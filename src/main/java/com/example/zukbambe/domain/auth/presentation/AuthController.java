@@ -13,7 +13,6 @@ import com.example.zukbambe.domain.auth.service.SignInService;
 import com.example.zukbambe.domain.auth.service.StudentSignUpService;
 import com.example.zukbambe.domain.auth.service.TeacherSignUpService;
 import com.example.zukbambe.domain.auth.service.VerifyEmailService;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -37,32 +36,44 @@ public class AuthController {
     private final StudentSignUpService studentSignUpService;
     private final TeacherSignUpService teacherSignUpService;
 
-    @Operation(summary = "로그인")
+    /**
+     * 로그인
+     */
     @PostMapping("/sign-in")
     public TokenResponse signIn(@Valid @RequestBody SignInRequest signInRequest) {
         return signInService.execute(signInRequest);
     }
 
-    @Operation(summary = "이메일 인증 코드 발송", description = "인증 코드는 3분간 유효하다.")
+    /**
+     * 이메일 인증 코드 발송<p>
+     * 인증 코드는 3분간 유효하다.
+     */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/email-verifications")
     public EmailVerificationResponse sendEmailVerification(@Valid @RequestBody SendEmailVerificationRequest request) {
         return sendEmailVerificationService.execute(request);
     }
 
-    @Operation(summary = "이메일 인증 코드 확인", description = "회원가입에 사용할 이메일 인증 토큰을 발급한다.")
+    /**
+     * 이메일 인증 코드 확인<p>
+     * 회원가입에 사용할 이메일 인증 토큰을 발급한다.
+     */
     @PostMapping("/email-verifications/verify")
     public EmailVerifiedTokenResponse verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
         return verifyEmailService.execute(request);
     }
 
-    @Operation(summary = "학생 회원가입")
+    /**
+     * 학생 회원가입
+     */
     @PostMapping("/sign-up")
     public TokenResponse studentSignUp(@Valid @RequestBody StudentSignUpRequest request) {
         return studentSignUpService.execute(request);
     }
 
-    @Operation(summary = "선생님 회원가입")
+    /**
+     * 선생님 회원가입
+     */
     @PostMapping("/sign-up/admin")
     public TokenResponse teacherSignUp(@Valid @RequestBody TeacherSignUpRequest request) {
         return teacherSignUpService.execute(request);

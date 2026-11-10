@@ -8,7 +8,6 @@ import com.example.zukbambe.domain.problem.service.DeleteProblemService;
 import com.example.zukbambe.domain.problem.service.QueryProblemDetailService;
 import com.example.zukbambe.domain.problem.service.QueryProblemListService;
 import com.example.zukbambe.domain.problem.service.UpdateProblemService;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -42,7 +41,10 @@ public class ProblemController {
     private final UpdateProblemService updateProblemService;
     private final DeleteProblemService deleteProblemService;
 
-    @Operation(summary = "문제 생성", description = "TEACHER 권한 필요. 생성된 문제 경로는 Location 헤더로 반환한다.")
+    /**
+     * 문제 생성<p>
+     * TEACHER 권한 필요. 생성된 문제 경로는 Location 헤더로 반환한다.
+     */
     @ApiResponse(responseCode = "201")
     @PostMapping
     public ResponseEntity<Void> createProblem(@RequestBody @Valid ProblemRequest request) {
@@ -51,7 +53,9 @@ public class ProblemController {
         return ResponseEntity.created(location).build();
     }
 
-    @Operation(summary = "문제 목록 조회")
+    /**
+     * 문제 목록 조회
+     */
     @GetMapping
     public ProblemListResponse getProblems(
         @RequestParam(defaultValue = "0") @Min(0) int page,
@@ -60,13 +64,18 @@ public class ProblemController {
         return queryProblemListService.execute(page, size);
     }
 
-    @Operation(summary = "문제 상세 조회")
+    /**
+     * 문제 상세 조회
+     */
     @GetMapping("/{problemId}")
     public ProblemDetailResponse getProblem(@PathVariable Long problemId) {
         return queryProblemDetailService.execute(problemId);
     }
 
-    @Operation(summary = "문제 수정", description = "TEACHER 권한 필요.")
+    /**
+     * 문제 수정<p>
+     * TEACHER 권한 필요.
+     */
     @PutMapping("/{problemId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateProblem(
@@ -76,7 +85,10 @@ public class ProblemController {
         updateProblemService.execute(problemId, request);
     }
 
-    @Operation(summary = "문제 삭제", description = "TEACHER 권한 필요.")
+    /**
+     * 문제 삭제<p>
+     * TEACHER 권한 필요.
+     */
     @DeleteMapping("/{problemId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteProblem(@PathVariable Long problemId) {

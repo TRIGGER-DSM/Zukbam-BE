@@ -4,7 +4,6 @@ import com.example.zukbambe.domain.rank.presentation.dto.request.UpdateProblemRa
 import com.example.zukbambe.domain.rank.presentation.dto.response.ProblemRankListResponse;
 import com.example.zukbambe.domain.rank.service.QueryProblemRankListService;
 import com.example.zukbambe.domain.rank.service.UpdateProblemRankService;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,13 +25,18 @@ public class ProblemRankController {
     private final QueryProblemRankListService queryProblemRankListService;
     private final UpdateProblemRankService updateProblemRankService;
 
-    @Operation(summary = "문제 랭크 목록 조회")
+    /**
+     * 문제 랭크 목록 조회
+     */
     @GetMapping
     public ProblemRankListResponse getProblemRanks() {
         return queryProblemRankListService.execute();
     }
 
-    @Operation(summary = "문제 랭크 수정", description = "TEACHER 권한 필요. XP가 바뀌면 그 랭크 문제를 푼 유저에게 차액을 지급한다.")
+    /**
+     * 문제 랭크 수정<p>
+     * TEACHER 권한 필요. XP가 바뀌면 그 랭크 문제를 푼 유저에게 차액을 지급한다.
+     */
     @PutMapping("/{problemRankId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateProblemRank(

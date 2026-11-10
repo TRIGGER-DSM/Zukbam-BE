@@ -5,7 +5,6 @@ import com.example.zukbambe.domain.streak.presentation.dto.response.StreakRespon
 import com.example.zukbambe.domain.streak.service.QueryGrassService;
 import com.example.zukbambe.domain.streak.service.QueryStreakService;
 import com.example.zukbambe.global.security.auth.CustomUserDetails;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -27,13 +26,18 @@ public class StreakController {
     private final QueryStreakService queryStreakService;
     private final QueryGrassService queryGrassService;
 
-    @Operation(summary = "내 스트릭 조회")
+    /**
+     * 내 스트릭 조회
+     */
     @GetMapping("/me")
     public StreakResponse getMyStreak(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return queryStreakService.execute(userDetails.userId());
     }
 
-    @Operation(summary = "내 잔디 조회", description = "from, to는 yyyy-MM-dd 형식이며 생략하면 기본 기간으로 조회한다.")
+    /**
+     * 내 잔디 조회<p>
+     * from, to는 yyyy-MM-dd 형식이며 생략하면 기본 기간으로 조회한다.
+     */
     @GetMapping("/me/grass")
     public GrassResponse getMyGrass(
         @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -43,13 +47,18 @@ public class StreakController {
         return queryGrassService.execute(userDetails.userId(), from, to);
     }
 
-    @Operation(summary = "유저 스트릭 조회")
+    /**
+     * 유저 스트릭 조회
+     */
     @GetMapping("/{userId}")
     public StreakResponse getUserStreak(@PathVariable Long userId) {
         return queryStreakService.execute(userId);
     }
 
-    @Operation(summary = "유저 잔디 조회", description = "from, to는 yyyy-MM-dd 형식이며 생략하면 기본 기간으로 조회한다.")
+    /**
+     * 유저 잔디 조회<p>
+     * from, to는 yyyy-MM-dd 형식이며 생략하면 기본 기간으로 조회한다.
+     */
     @GetMapping("/{userId}/grass")
     public GrassResponse getUserGrass(
         @PathVariable Long userId,
