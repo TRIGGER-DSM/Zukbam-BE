@@ -4,7 +4,6 @@ import com.example.zukbambe.domain.ranking.domain.enums.RankingMetric;
 import com.example.zukbambe.domain.ranking.domain.enums.RankingPeriod;
 import com.example.zukbambe.domain.ranking.presentation.dto.response.RankingListResponse;
 import com.example.zukbambe.domain.ranking.service.QueryRankingListService;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -22,7 +21,12 @@ public class RankingController {
 
     private final QueryRankingListService queryRankingListService;
 
-    @Operation(summary = "랭킹 조회", description = "조회 시점 기준으로 바로 집계한다. 스트릭은 기간과 관계없이 전체 기준으로 응답한다.")
+    /**
+     * 랭킹 조회<p>
+     * metric으로 정렬 기준(XP, 푼 문제 수, 스트릭)을, period로 집계 기간(주간, 월간, 전체)을 고른다.
+     * 주간은 이번 주 월요일 0시부터, 월간은 이번 달 1일 0시부터 센다. 미리 계산해 두지 않고 조회할 때 바로 집계한다.
+     * 스트릭은 기간을 무엇으로 주든 전체 기준으로 나온다.
+     */
     @GetMapping
     public RankingListResponse getRankings(
         @RequestParam(defaultValue = "XP") RankingMetric metric,

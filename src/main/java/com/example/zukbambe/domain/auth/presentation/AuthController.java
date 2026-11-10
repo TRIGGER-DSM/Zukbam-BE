@@ -13,7 +13,6 @@ import com.example.zukbambe.domain.auth.service.SignInService;
 import com.example.zukbambe.domain.auth.service.StudentSignUpService;
 import com.example.zukbambe.domain.auth.service.TeacherSignUpService;
 import com.example.zukbambe.domain.auth.service.VerifyEmailService;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -37,32 +36,52 @@ public class AuthController {
     private final StudentSignUpService studentSignUpService;
     private final TeacherSignUpService teacherSignUpService;
 
-    @Operation(summary = "로그인")
+    /**
+     * 로그인<p>
+     * 이메일과 비밀번호가 맞으면 액세스 토큰과 리프레시 토큰을 발급한다.
+     * 이메일이 없든 비밀번호가 틀리든 같은 에러를 내려준다.
+     */
     @PostMapping("/sign-in")
     public TokenResponse signIn(@Valid @RequestBody SignInRequest signInRequest) {
         return signInService.execute(signInRequest);
     }
 
-    @Operation(summary = "이메일 인증 코드 발송", description = "인증 코드는 3분간 유효하다.")
+    /**
+     * 이메일 인증 코드 발송<p>
+     * dsm.hs.kr 이메일로 6자리 인증 코드를 보낸다. 코드는 3분 동안만 쓸 수 있다.
+     * 응답으로 받은 verificationId는 인증 코드 확인 때 함께 보낸다.
+     */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/email-verifications")
     public EmailVerificationResponse sendEmailVerification(@Valid @RequestBody SendEmailVerificationRequest request) {
         return sendEmailVerificationService.execute(request);
     }
 
-    @Operation(summary = "이메일 인증 코드 확인", description = "회원가입에 사용할 이메일 인증 토큰을 발급한다.")
+    /**
+     * 이메일 인증 코드 확인<p>
+     * 코드가 맞으면 회원가입에 쓸 이메일 인증 토큰을 발급한다.
+     * 한 번 확인한 코드는 다시 쓸 수 없다.
+     */
     @PostMapping("/email-verifications/verify")
     public EmailVerifiedTokenResponse verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
         return verifyEmailService.execute(request);
     }
 
-    @Operation(summary = "학생 회원가입")
+    /**
+     * 학생 회원가입<p>
+     * 이메일 인증 토큰이 있어야 하고, 인증받은 이메일로만 가입할 수 있다.
+     * dsm.hs.kr 이메일만 가입된다. 가입하면 따로 로그인하지 않아도 되도록 토큰을 바로 발급한다.
+     */
     @PostMapping("/sign-up")
     public TokenResponse studentSignUp(@Valid @RequestBody StudentSignUpRequest request) {
         return studentSignUpService.execute(request);
     }
 
-    @Operation(summary = "선생님 회원가입")
+    /**
+     * 선생님 회원가입<p>
+     * 선생님 인증 코드와 이메일 인증 토큰이 있어야 하고, 인증받은 이메일로만 가입할 수 있다.
+     * 가입하면 따로 로그인하지 않아도 되도록 토큰을 바로 발급한다.
+     */
     @PostMapping("/sign-up/admin")
     public TokenResponse teacherSignUp(@Valid @RequestBody TeacherSignUpRequest request) {
         return teacherSignUpService.execute(request);

@@ -3,7 +3,6 @@ package com.example.zukbambe.domain.xp.presentation;
 import com.example.zukbambe.domain.xp.presentation.dto.response.XpHistoryListResponse;
 import com.example.zukbambe.domain.xp.service.QueryXpHistoryListService;
 import com.example.zukbambe.domain.xp.service.RecalculateMyXpService;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -26,7 +25,10 @@ public class XpController {
     private final QueryXpHistoryListService queryXpHistoryListService;
     private final RecalculateMyXpService recalculateMyXpService;
 
-    @Operation(summary = "유저 XP 내역 조회", description = "최신순으로 조회한다.")
+    /**
+     * 유저 XP 내역 조회<p>
+     * XP를 받거나 깎인 내역을 최신순으로 보여준다.
+     */
     @GetMapping("/{userId}/xp-histories")
     public XpHistoryListResponse getXpHistories(
         @PathVariable Long userId,
@@ -36,7 +38,10 @@ public class XpController {
         return queryXpHistoryListService.execute(userId, page, size);
     }
 
-    @Operation(summary = "내 XP 재계산", description = "XP 내역 합계로 내 XP와 랭크를 다시 맞춘다.")
+    /**
+     * 내 XP 재계산<p>
+     * XP 내역을 모두 더한 값으로 내 XP와 랭크를 다시 맞춘다.
+     */
     @PostMapping("/me/xp/recalculate")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void recalculateMyXp() {
