@@ -47,8 +47,8 @@ public class User {
     private String phoneNumber;
 
     @Builder.Default
-    @Column(nullable = false, name = "score")
-    private Long score = 0L;
+    @Column(nullable = false, name = "xp")
+    private Long xp = 0L;
 
     @Column(nullable = false, name = "role")
     @Enumerated(EnumType.STRING)
