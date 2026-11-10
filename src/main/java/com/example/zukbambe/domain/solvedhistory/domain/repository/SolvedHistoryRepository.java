@@ -1,5 +1,6 @@
 package com.example.zukbambe.domain.solvedhistory.domain.repository;
 
+import com.example.zukbambe.domain.rank.domain.ProblemRank;
 import com.example.zukbambe.domain.solvedhistory.domain.SolvedHistory;
 import com.example.zukbambe.domain.solvedhistory.domain.SolvedHistoryId;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -38,6 +39,20 @@ public interface SolvedHistoryRepository extends JpaRepository<SolvedHistory, So
           and s.solvedDate < :end
         """)
     List<LocalDateTime> findSolvedDatesByUserIdAndPeriod(
+        @Param("userId") Long userId,
+        @Param("start") LocalDateTime start,
+        @Param("end") LocalDateTime end
+    );
+
+    @Query("""
+        select p.rank
+        from SolvedHistory s
+        join s.problem p
+        where s.id.userId = :userId
+          and s.solvedDate >= :start
+          and s.solvedDate < :end
+        """)
+    List<ProblemRank> findSolvedProblemRanksByUserIdAndPeriod(
         @Param("userId") Long userId,
         @Param("start") LocalDateTime start,
         @Param("end") LocalDateTime end

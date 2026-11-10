@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,4 +44,17 @@ public interface SolutionRepository extends JpaRepository<Solution, Long> {
 
     @Query("select s.solutionId from Solution s where s.status = :status order by s.solutionId")
     List<Long> findIdsByStatus(@Param("status") Status status);
+
+    @Query("""
+        select s.language as language, s.status as status
+        from Solution s
+        where s.user.userId = :userId
+          and s.submittedAt >= :start
+          and s.submittedAt < :end
+        """)
+    List<SubmissionRow> findSubmissionsByUserIdAndPeriod(
+        @Param("userId") Long userId,
+        @Param("start") LocalDateTime start,
+        @Param("end") LocalDateTime end
+    );
 }
