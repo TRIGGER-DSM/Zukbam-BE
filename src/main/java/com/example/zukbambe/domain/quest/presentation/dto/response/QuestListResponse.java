@@ -13,10 +13,16 @@ public record QuestListResponse(
     List<QuestResponse> quests,
     LocalDateTime resetAt
 ) {
-    public static QuestListResponse of(List<DailyQuest> quests, DailyActivity activity, List<ProblemRank> ranks, LocalDateTime resetAt) {
+    public static QuestListResponse of(
+        List<DailyQuest> quests,
+        DailyActivity activity,
+        List<ProblemRank> ranks,
+        List<DailyQuest> rewardedQuests,
+        LocalDateTime resetAt
+    ) {
         return QuestListResponse.builder()
             .quests(quests.stream()
-                .map(quest -> QuestResponse.of(quest, activity, ranks))
+                .map(quest -> QuestResponse.of(quest, activity, ranks, rewardedQuests.contains(quest)))
                 .toList())
             .resetAt(resetAt)
             .build();

@@ -15,9 +15,11 @@ public record QuestResponse(
     String title,
     int current,
     int target,
-    boolean completed
+    boolean completed,
+    long rewardXp,
+    boolean rewarded
 ) {
-    public static QuestResponse of(DailyQuest quest, DailyActivity activity, List<ProblemRank> ranks) {
+    public static QuestResponse of(DailyQuest quest, DailyActivity activity, List<ProblemRank> ranks, boolean rewarded) {
         int current = quest.getCurrent(activity, ranks);
         return QuestResponse.builder()
             .type(quest)
@@ -26,6 +28,8 @@ public record QuestResponse(
             .current(current)
             .target(quest.getTarget())
             .completed(current >= quest.getTarget())
+            .rewardXp(quest.getDifficulty().getRewardXp())
+            .rewarded(rewarded)
             .build();
     }
 }
