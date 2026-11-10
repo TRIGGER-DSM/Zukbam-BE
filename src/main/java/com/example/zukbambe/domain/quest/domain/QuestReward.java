@@ -30,8 +30,8 @@ public class QuestReward {
     @Column(nullable = false, name = "quest_date")
     private LocalDate questDate;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false, name = "quest")
+    @Enumerated(EnumType.STRING)
     private DailyQuest quest;
 
     @Column(nullable = false, name = "xp")
