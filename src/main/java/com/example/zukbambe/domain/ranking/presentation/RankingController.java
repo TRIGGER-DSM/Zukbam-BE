@@ -23,7 +23,9 @@ public class RankingController {
 
     /**
      * 랭킹 조회<p>
-     * 조회 시점 기준으로 바로 집계한다. 스트릭은 기간과 관계없이 전체 기준으로 응답한다.
+     * metric으로 정렬 기준(XP, 푼 문제 수, 스트릭)을, period로 집계 기간(주간, 월간, 전체)을 고른다.
+     * 주간은 이번 주 월요일 0시, 월간은 이번 달 1일 0시부터 집계하며, 조회 시점 기준으로 바로 집계한다.
+     * 스트릭은 기간과 관계없이 전체 기준으로 응답한다.
      */
     @GetMapping
     public RankingListResponse getRankings(

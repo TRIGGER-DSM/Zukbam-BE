@@ -20,7 +20,8 @@ public class UserController {
     private final QueryUserProfileService queryUserProfileService;
 
     /**
-     * 내 프로필 조회
+     * 내 프로필 조회<p>
+     * XP, 랭크, 푼 문제 수를 함께 응답한다. 선생님은 학생 정보(student)가 null이다.
      */
     @GetMapping("/me")
     public UserProfileResponse getMyProfile() {
@@ -28,7 +29,8 @@ public class UserController {
     }
 
     /**
-     * 유저 프로필 조회
+     * 유저 프로필 조회<p>
+     * XP, 랭크, 푼 문제 수를 함께 응답한다. 선생님은 학생 정보(student)가 null이다.
      */
     @GetMapping("/{userId}")
     public UserProfileResponse getUserProfile(@PathVariable Long userId) {

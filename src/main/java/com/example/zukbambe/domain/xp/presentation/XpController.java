@@ -27,7 +27,7 @@ public class XpController {
 
     /**
      * 유저 XP 내역 조회<p>
-     * 최신순으로 조회한다.
+     * XP가 지급되거나 차감된 내역을 최신순으로 조회한다.
      */
     @GetMapping("/{userId}/xp-histories")
     public XpHistoryListResponse getXpHistories(

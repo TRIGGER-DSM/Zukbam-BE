@@ -27,7 +27,9 @@ public class StreakController {
     private final QueryGrassService queryGrassService;
 
     /**
-     * 내 스트릭 조회
+     * 내 스트릭 조회<p>
+     * 어제와 오늘 모두 문제를 풀지 않았으면 현재 스트릭은 0으로 응답한다.
+     * 아직 한 문제도 풀지 않았으면 모두 0으로 응답한다.
      */
     @GetMapping("/me")
     public StreakResponse getMyStreak(@AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -36,7 +38,8 @@ public class StreakController {
 
     /**
      * 내 잔디 조회<p>
-     * from, to는 yyyy-MM-dd 형식이며 생략하면 기본 기간으로 조회한다.
+     * 날짜별로 처음 맞힌 문제 수를 응답하며, 문제를 푼 날만 응답에 포함된다.
+     * from, to는 yyyy-MM-dd 형식이며 생략하면 오늘까지 최근 1년을 조회한다. 조회 기간은 1년을 넘을 수 없다.
      */
     @GetMapping("/me/grass")
     public GrassResponse getMyGrass(
@@ -48,7 +51,9 @@ public class StreakController {
     }
 
     /**
-     * 유저 스트릭 조회
+     * 유저 스트릭 조회<p>
+     * 어제와 오늘 모두 문제를 풀지 않았으면 현재 스트릭은 0으로 응답한다.
+     * 아직 한 문제도 풀지 않았으면 모두 0으로 응답한다.
      */
     @GetMapping("/{userId}")
     public StreakResponse getUserStreak(@PathVariable Long userId) {
@@ -57,7 +62,8 @@ public class StreakController {
 
     /**
      * 유저 잔디 조회<p>
-     * from, to는 yyyy-MM-dd 형식이며 생략하면 기본 기간으로 조회한다.
+     * 날짜별로 처음 맞힌 문제 수를 응답하며, 문제를 푼 날만 응답에 포함된다.
+     * from, to는 yyyy-MM-dd 형식이며 생략하면 오늘까지 최근 1년을 조회한다. 조회 기간은 1년을 넘을 수 없다.
      */
     @GetMapping("/{userId}/grass")
     public GrassResponse getUserGrass(

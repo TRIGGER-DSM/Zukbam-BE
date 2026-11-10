@@ -35,7 +35,8 @@ public class SolutionController {
 
     /**
      * 풀이 제출<p>
-     * 채점은 비동기로 진행된다. 생성된 풀이 경로는 Location 헤더로 반환한다.
+     * 채점은 비동기로 진행되므로 결과는 풀이 상세 조회로 확인한다. 1분에 10번까지 제출할 수 있다.
+     * 생성된 풀이 경로는 Location 헤더로 반환한다.
      */
     @ApiResponse(responseCode = "201")
     @PostMapping("/{problemId}")
@@ -50,7 +51,8 @@ public class SolutionController {
 
     /**
      * 풀이 목록 조회<p>
-     * page는 1부터 시작한다.
+     * 최신순으로 조회하며 problemId, email로 걸러낼 수 있다. page는 1부터 시작한다.
+     * 다른 유저의 풀이는 code가 null로 응답된다.
      */
     @GetMapping
     public SolutionListResponse getSolutions(
@@ -63,7 +65,8 @@ public class SolutionController {
     }
 
     /**
-     * 풀이 상세 조회
+     * 풀이 상세 조회<p>
+     * 다른 유저의 풀이는 code가 null로 응답된다. 채점이 끝나지 않았으면 status가 PENDING이다.
      */
     @GetMapping("/{solutionId}")
     public SolutionResponse getSolution(@PathVariable Long solutionId) {
