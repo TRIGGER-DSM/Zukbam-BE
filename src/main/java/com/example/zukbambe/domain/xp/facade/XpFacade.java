@@ -20,6 +20,7 @@ public class XpFacade {
     private static final String SOLVE_REASON = "문제 풀이";
     private static final String PROBLEM_RANK_CHANGE_REASON = "문제 난이도 변경";
     private static final String PROBLEM_RANK_XP_CHANGE_REASON = "난이도 XP 변경";
+    private static final String QUEST_REASON = "일일 퀘스트";
 
     private final XpHistoryRepository xpHistoryRepository;
     private final UserRepository userRepository;
@@ -32,6 +33,12 @@ public class XpFacade {
         xpHistoryRepository.save(XpHistory.of(
             user, amount, SOLVE_REASON, problem.getProblemId(), problem.getTitle(), LocalDateTime.now(clock)
         ));
+        userRepository.addXp(user.getUserId(), amount);
+    }
+
+    @Transactional
+    public void grantForQuest(User user, long amount) {
+        xpHistoryRepository.save(XpHistory.of(user, amount, QUEST_REASON, null, null, LocalDateTime.now(clock)));
         userRepository.addXp(user.getUserId(), amount);
     }
 
