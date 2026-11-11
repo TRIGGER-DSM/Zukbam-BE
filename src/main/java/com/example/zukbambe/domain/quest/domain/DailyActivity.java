@@ -29,13 +29,6 @@ public record DailyActivity(
             .count();
     }
 
-    // 오늘 처음 맞힌 문제로 얻은 XP. 난이도 변경으로 생긴 차액 지급은 세지 않는다
-    public int earnedXp() {
-        return (int) solvedRanks.stream()
-            .mapToLong(ProblemRank::getXp)
-            .sum();
-    }
-
     public int submissionCount() {
         return submissions.size();
     }
