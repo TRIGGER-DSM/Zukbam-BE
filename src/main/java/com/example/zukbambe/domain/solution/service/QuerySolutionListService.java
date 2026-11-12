@@ -5,6 +5,8 @@ import com.example.zukbambe.domain.solution.domain.Solution;
 import com.example.zukbambe.domain.solution.domain.repository.SolutionRepository;
 import com.example.zukbambe.domain.solution.presentation.dto.response.SolutionListResponse;
 import com.example.zukbambe.domain.solvedhistory.domain.repository.SolvedHistoryRepository;
+import com.example.zukbambe.domain.user.domain.User;
+import com.example.zukbambe.domain.user.domain.enums.Role;
 import com.example.zukbambe.domain.user.facade.UserFacade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -31,7 +33,9 @@ public class QuerySolutionListService {
             problemFacade.getProblemById(problemId);
         }
 
-        Long currentUserId = userFacade.getCurrentUserId();
+        User currentUser = userFacade.getCurrentUser();
+        Long currentUserId = currentUser.getUserId();
+        boolean isTeacher = currentUser.getRole() == Role.TEACHER;
         Page<Solution> solutions = solutionRepository.findAllByFilter(
             problemId,
             email,
@@ -39,10 +43,11 @@ public class QuerySolutionListService {
         );
         Set<Long> solvedProblemIds = findSolvedProblemIds(currentUserId, solutions);
 
-        // 내 풀이이거나, 그 풀이의 문제를 내가 푼 적이 있으면 코드를 볼 수 있다
+        // 선생님이거나, 내 풀이이거나, 그 풀이의 문제를 내가 푼 적이 있으면 코드를 볼 수 있다
         return SolutionListResponse.of(
             solutions,
-            solution -> solution.getUser().getUserId().equals(currentUserId)
+            solution -> isTeacher
+                || solution.getUser().getUserId().equals(currentUserId)
                 || solvedProblemIds.contains(solution.getProblem().getProblemId())
         );
     }

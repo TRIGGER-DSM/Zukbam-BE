@@ -52,7 +52,7 @@ public class SolutionController {
     /**
      * 풀이 목록 조회<p>
      * 최신순으로 나오고 problemId, email로 좁혀 볼 수 있다. page는 1부터 시작한다.
-     * 다른 유저의 풀이는 그 문제를 내가 푼 적이 있을 때만 code가 나오고, 아니면 null이다.
+     * 다른 유저의 풀이는 선생님이거나 그 문제를 내가 푼 적이 있을 때만 code가 나오고, 아니면 null이다.
      */
     @GetMapping
     public SolutionListResponse getSolutions(
@@ -66,7 +66,7 @@ public class SolutionController {
 
     /**
      * 풀이 상세 조회<p>
-     * 다른 유저의 풀이는 그 문제를 내가 푼 적이 있을 때만 code가 나오고, 아니면 null이다.
+     * 다른 유저의 풀이는 선생님이거나 그 문제를 내가 푼 적이 있을 때만 code가 나오고, 아니면 null이다.
      * 채점이 아직 안 끝났으면 status가 PENDING이다.
      */
     @GetMapping("/{solutionId}")
