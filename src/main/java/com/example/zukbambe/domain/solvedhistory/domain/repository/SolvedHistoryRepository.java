@@ -9,7 +9,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 public interface SolvedHistoryRepository extends JpaRepository<SolvedHistory, SolvedHistoryId> {
 
@@ -56,5 +58,16 @@ public interface SolvedHistoryRepository extends JpaRepository<SolvedHistory, So
         @Param("userId") Long userId,
         @Param("start") LocalDateTime start,
         @Param("end") LocalDateTime end
+    );
+
+    @Query("""
+        select s.id.problemId
+        from SolvedHistory s
+        where s.id.userId = :userId
+          and s.id.problemId in :problemIds
+        """)
+    Set<Long> findSolvedProblemIds(
+        @Param("userId") Long userId,
+        @Param("problemIds") Collection<Long> problemIds
     );
 }
