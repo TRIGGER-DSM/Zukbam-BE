@@ -47,6 +47,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.DELETE, "/problems/*").hasRole(Role.TEACHER.name())
                 .requestMatchers(HttpMethod.GET, "/problem-ranks").permitAll()
                 .requestMatchers(HttpMethod.PUT, "/problem-ranks/*").hasRole(Role.TEACHER.name())
+                .requestMatchers(HttpMethod.GET, "/notices", "/notices/*").permitAll()
+                .requestMatchers(HttpMethod.POST, "/notices").hasRole(Role.TEACHER.name())
+                .requestMatchers(HttpMethod.PUT, "/notices/*").hasRole(Role.TEACHER.name())
+                .requestMatchers(HttpMethod.DELETE, "/notices/*").hasRole(Role.TEACHER.name())
                 .anyRequest().authenticated()
             )
 
