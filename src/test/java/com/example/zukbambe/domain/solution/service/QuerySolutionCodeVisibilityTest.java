@@ -108,6 +108,23 @@ class QuerySolutionCodeVisibilityTest {
         assertThat(listCode()).isEqualTo("other code");
     }
 
+    @Test
+    void 선생님은_문제를_안_풀었어도_다른_사람_코드를_볼_수_있다() {
+        User teacher = userRepository.save(User.builder()
+            .email("teacher-" + UUID.randomUUID().toString().substring(0, 8) + "@dsm.hs.kr")
+            .password("password")
+            .name("teacher")
+            .role(Role.TEACHER)
+            .rank(viewer.getRank())
+            .build());
+        SecurityContextHolder.getContext().setAuthentication(UsernamePasswordAuthenticationToken.authenticated(
+            new CustomUserDetails(teacher.getUserId(), Role.TEACHER), null, List.of()
+        ));
+
+        assertThat(querySolutionDetailService.execute(otherSolution.getSolutionId()).code()).isEqualTo("other code");
+        assertThat(listCode()).isEqualTo("other code");
+    }
+
     private String listCode() {
         return querySolutionListService.execute(1, 20, problem.getProblemId(), other.getEmail()).solutions().stream()
             .filter(response -> response.solutionId().equals(otherSolution.getSolutionId()))
