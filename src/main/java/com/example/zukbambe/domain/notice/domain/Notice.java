@@ -29,7 +29,7 @@ public class Notice {
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "author_id", foreignKey = @ForeignKey(name = "fk_notices_author"))
+    @JoinColumn(name = "author_id", nullable = false, foreignKey = @ForeignKey(name = "fk_notices_author"))
     private User author;
 
     @CreatedDate
