@@ -5,6 +5,7 @@ import lombok.Builder;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 @Builder
 public record SolutionListResponse(
@@ -14,9 +15,9 @@ public record SolutionListResponse(
     long totalElements,
     int totalPages
 ) {
-    public static SolutionListResponse of(Page<Solution> page, Long currentUserId) {
+    public static SolutionListResponse of(Page<Solution> page, Predicate<Solution> codeVisible) {
         return SolutionListResponse.builder()
-            .solutions(page.getContent().stream().map(solution -> SolutionResponse.of(solution, currentUserId)).toList())
+            .solutions(page.getContent().stream().map(solution -> SolutionResponse.of(solution, codeVisible.test(solution))).toList())
             .page(page.getNumber() + 1)
             .size(page.getSize())
             .totalElements(page.getTotalElements())

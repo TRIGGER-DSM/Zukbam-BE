@@ -17,12 +17,11 @@ public record SolutionResponse(
     Status status,
     LocalDateTime submittedAt
 ) {
-    public static SolutionResponse of(Solution solution, Long currentUserId) {
-        boolean isMine = solution.getUser().getUserId().equals(currentUserId);
+    public static SolutionResponse of(Solution solution, boolean codeVisible) {
         return SolutionResponse.builder()
             .solutionId(solution.getSolutionId())
             .language(solution.getLanguage())
-            .code(isMine ? solution.getCode() : null)
+            .code(codeVisible ? solution.getCode() : null)
             .memoryUsage(solution.getMemoryUsed())
             .time(solution.getTime())
             .status(solution.getStatus())
