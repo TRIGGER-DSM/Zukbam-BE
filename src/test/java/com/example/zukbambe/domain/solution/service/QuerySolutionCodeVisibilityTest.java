@@ -125,6 +125,16 @@ class QuerySolutionCodeVisibilityTest {
         assertThat(listCode()).isEqualTo("other code");
     }
 
+    @Test
+    void 풀이_응답에_문제_ID가_나온다() {
+        assertThat(querySolutionDetailService.execute(otherSolution.getSolutionId()).problemId())
+            .isEqualTo(problem.getProblemId());
+        // 문제로 좁히지 않고 email로만 조회해도 어떤 문제의 풀이인지 알 수 있어야 한다
+        assertThat(querySolutionListService.execute(1, 20, null, other.getEmail()).solutions())
+            .extracting(SolutionResponse::problemId)
+            .containsExactly(problem.getProblemId());
+    }
+
     private String listCode() {
         return querySolutionListService.execute(1, 20, problem.getProblemId(), other.getEmail()).solutions().stream()
             .filter(response -> response.solutionId().equals(otherSolution.getSolutionId()))
