@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @Builder
 public record SolutionResponse(
     Long solutionId,
+    Long problemId,
     Language language,
     String code,
     Long memoryUsage,
@@ -20,6 +21,7 @@ public record SolutionResponse(
     public static SolutionResponse of(Solution solution, boolean codeVisible) {
         return SolutionResponse.builder()
             .solutionId(solution.getSolutionId())
+            .problemId(solution.getProblem().getProblemId())
             .language(solution.getLanguage())
             .code(codeVisible ? solution.getCode() : null)
             .memoryUsage(solution.getMemoryUsed())
