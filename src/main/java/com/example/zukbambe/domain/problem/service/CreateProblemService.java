@@ -1,5 +1,9 @@
 package com.example.zukbambe.domain.problem.service;
 
+import com.example.zukbambe.domain.category.domain.Category;
+import com.example.zukbambe.domain.category.domain.ProblemCategory;
+import com.example.zukbambe.domain.category.domain.repository.ProblemCategoryRepository;
+import com.example.zukbambe.domain.category.facade.CategoryFacade;
 import com.example.zukbambe.domain.problem.domain.Problem;
 import com.example.zukbambe.domain.problem.domain.repository.ProblemRepository;
 import com.example.zukbambe.domain.problem.exception.ProblemTitleDuplicatedException;
@@ -12,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class CreateProblemService {
@@ -19,6 +25,8 @@ public class CreateProblemService {
     private final ProblemRepository problemRepository;
     private final TestCaseRepository testCaseRepository;
     private final ProblemRankFacade problemRankFacade;
+    private final CategoryFacade categoryFacade;
+    private final ProblemCategoryRepository problemCategoryRepository;
 
     @Transactional
     public Long execute(ProblemRequest request) {
@@ -27,6 +35,7 @@ public class CreateProblemService {
         }
 
         ProblemRank rank = problemRankFacade.getProblemRankById(request.problemRankId());
+        List<Category> categories = categoryFacade.getCategoriesByIds(request.categoryIds());
 
         Problem problem = problemRepository.save(
             Problem.builder()
@@ -42,6 +51,10 @@ public class CreateProblemService {
             request.testCases().stream()
                 .map(testCase -> TestCase.of(problem, testCase.input(), testCase.output(), testCase.isSample()))
                 .toList()
+        );
+
+        problemCategoryRepository.saveAll(
+            categories.stream().map(category -> ProblemCategory.of(problem, category)).toList()
         );
 
         return problem.getProblemId();
