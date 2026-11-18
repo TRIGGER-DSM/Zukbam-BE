@@ -3,6 +3,8 @@ package com.example.zukbambe.domain.solvedhistory.domain.repository;
 import com.example.zukbambe.domain.rank.domain.ProblemRank;
 import com.example.zukbambe.domain.solvedhistory.domain.SolvedHistory;
 import com.example.zukbambe.domain.solvedhistory.domain.SolvedHistoryId;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -68,6 +70,46 @@ public interface SolvedHistoryRepository extends JpaRepository<SolvedHistory, So
         """)
     Set<Long> findSolvedProblemIds(
         @Param("userId") Long userId,
+        @Param("problemIds") Collection<Long> problemIds
+    );
+
+    // 친구가 푼 문제 중 내가 아직 안 푼 문제의 ID를, 친구가 가장 최근에 푼 순서로 가져온다
+    @Query(
+        value = """
+            select s.id.problemId
+            from SolvedHistory s
+            where s.id.userId in :friendIds
+              and s.id.problemId not in (select m.id.problemId from SolvedHistory m where m.id.userId = :userId)
+            group by s.id.problemId
+            order by max(s.solvedDate) desc, s.id.problemId desc
+            """,
+        countQuery = """
+            select count(distinct s.id.problemId)
+            from SolvedHistory s
+            where s.id.userId in :friendIds
+              and s.id.problemId not in (select m.id.problemId from SolvedHistory m where m.id.userId = :userId)
+            """
+    )
+    Page<Long> findFriendSolvedProblemIds(
+        @Param("userId") Long userId,
+        @Param("friendIds") Collection<Long> friendIds,
+        Pageable pageable
+    );
+
+    // 주어진 문제들을 푼 친구 기록을 최근에 푼 순서로 가져온다. 응답에 쓸 문제, 난이도, 친구, 친구 랭크를 한 번에 불러온다
+    @Query("""
+        select s
+        from SolvedHistory s
+        join fetch s.problem p
+        join fetch p.rank
+        join fetch s.user u
+        join fetch u.rank
+        where s.id.problemId in :problemIds
+          and s.id.userId in :friendIds
+        order by s.solvedDate desc, s.id.userId
+        """)
+    List<SolvedHistory> findFriendSolvedHistories(
+        @Param("friendIds") Collection<Long> friendIds,
         @Param("problemIds") Collection<Long> problemIds
     );
 }
