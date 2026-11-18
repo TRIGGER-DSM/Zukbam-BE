@@ -57,6 +57,8 @@ public class ProblemController {
     /**
      * 문제 목록 조회<p>
      * 로그인하지 않아도 볼 수 있다. 문제 번호순으로 나온다.
+     * 문제마다 푼 사람 수, 평균 시도(푼 사람이 처음 정답을 받기까지 낸 제출 수의 평균, 푼 사람이 없으면 null)가 나온다.
+     * 로그인했다면 내 풀이 상태(푼 문제 SOLVED, 제출만 했으면 ATTEMPTED, 제출한 적 없으면 UNATTEMPTED)도 나오고, 로그인하지 않았다면 null이다.
      */
     @GetMapping
     public ProblemListResponse getProblems(
