@@ -10,6 +10,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
 
     @EntityGraph(attributePaths = {"requester", "receiver"})
@@ -22,6 +24,18 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
         @Param("user") User user,
         @Param("status") FriendshipStatus status,
         Pageable pageable
+    );
+
+    // 내가 보낸 요청이면 받은 사람, 받은 요청이면 보낸 사람이 친구다
+    @Query("""
+        SELECT CASE WHEN f.requester.userId = :userId THEN f.receiver.userId ELSE f.requester.userId END
+        FROM Friendship f
+        WHERE (f.requester.userId = :userId OR f.receiver.userId = :userId)
+        AND f.status = :status
+        """)
+    List<Long> findFriendIds(
+        @Param("userId") Long userId,
+        @Param("status") FriendshipStatus status
     );
 
     @EntityGraph(attributePaths = "requester")

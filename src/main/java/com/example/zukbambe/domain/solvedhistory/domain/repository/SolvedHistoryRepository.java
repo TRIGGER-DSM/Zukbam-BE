@@ -1,6 +1,5 @@
 package com.example.zukbambe.domain.solvedhistory.domain.repository;
 
-import com.example.zukbambe.domain.friend.domain.enums.FriendshipStatus;
 import com.example.zukbambe.domain.rank.domain.ProblemRank;
 import com.example.zukbambe.domain.solvedhistory.domain.SolvedHistory;
 import com.example.zukbambe.domain.solvedhistory.domain.SolvedHistoryId;
@@ -79,8 +78,7 @@ public interface SolvedHistoryRepository extends JpaRepository<SolvedHistory, So
         value = """
             select s.id.problemId
             from SolvedHistory s
-            where (s.id.userId in (select f.receiver.userId from Friendship f where f.requester.userId = :userId and f.status = :accepted)
-                or s.id.userId in (select f.requester.userId from Friendship f where f.receiver.userId = :userId and f.status = :accepted))
+            where s.id.userId in :friendIds
               and s.id.problemId not in (select m.id.problemId from SolvedHistory m where m.id.userId = :userId)
             group by s.id.problemId
             order by max(s.solvedDate) desc, s.id.problemId desc
@@ -88,14 +86,13 @@ public interface SolvedHistoryRepository extends JpaRepository<SolvedHistory, So
         countQuery = """
             select count(distinct s.id.problemId)
             from SolvedHistory s
-            where (s.id.userId in (select f.receiver.userId from Friendship f where f.requester.userId = :userId and f.status = :accepted)
-                or s.id.userId in (select f.requester.userId from Friendship f where f.receiver.userId = :userId and f.status = :accepted))
+            where s.id.userId in :friendIds
               and s.id.problemId not in (select m.id.problemId from SolvedHistory m where m.id.userId = :userId)
             """
     )
     Page<Long> findFriendSolvedProblemIds(
         @Param("userId") Long userId,
-        @Param("accepted") FriendshipStatus accepted,
+        @Param("friendIds") Collection<Long> friendIds,
         Pageable pageable
     );
 
@@ -108,13 +105,11 @@ public interface SolvedHistoryRepository extends JpaRepository<SolvedHistory, So
         join fetch s.user u
         join fetch u.rank
         where s.id.problemId in :problemIds
-          and (s.id.userId in (select f.receiver.userId from Friendship f where f.requester.userId = :userId and f.status = :accepted)
-            or s.id.userId in (select f.requester.userId from Friendship f where f.receiver.userId = :userId and f.status = :accepted))
+          and s.id.userId in :friendIds
         order by s.solvedDate desc, s.id.userId
         """)
     List<SolvedHistory> findFriendSolvedHistories(
-        @Param("userId") Long userId,
-        @Param("accepted") FriendshipStatus accepted,
+        @Param("friendIds") Collection<Long> friendIds,
         @Param("problemIds") Collection<Long> problemIds
     );
 }
