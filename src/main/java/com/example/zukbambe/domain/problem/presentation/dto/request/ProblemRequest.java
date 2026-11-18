@@ -30,6 +30,14 @@ public record ProblemRequest(
 
     @NotEmpty(message = "테스트케이스는 1개 이상이어야 합니다.")
     @Valid
-    List<@NotNull(message = "테스트케이스는 null일 수 없습니다.") TestCaseRequest> testCases
+    List<@NotNull(message = "테스트케이스는 null일 수 없습니다.") TestCaseRequest> testCases,
+
+    List<@NotNull(message = "분류 ID는 null일 수 없습니다.") Long> categoryIds
 ) {
+    // 분류는 선택이라 보내지 않으면 분류 없이 저장한다
+    public ProblemRequest {
+        if (categoryIds == null) {
+            categoryIds = List.of();
+        }
+    }
 }

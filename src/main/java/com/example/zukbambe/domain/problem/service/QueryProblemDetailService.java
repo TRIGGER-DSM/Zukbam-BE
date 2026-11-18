@@ -1,5 +1,7 @@
 package com.example.zukbambe.domain.problem.service;
 
+import com.example.zukbambe.domain.category.domain.repository.ProblemCategoryRepository;
+import com.example.zukbambe.domain.category.presentation.dto.response.CategoryResponse;
 import com.example.zukbambe.domain.problem.domain.Problem;
 import com.example.zukbambe.domain.problem.facade.ProblemFacade;
 import com.example.zukbambe.domain.problem.presentation.dto.response.ProblemDetailResponse;
@@ -20,6 +22,7 @@ public class QueryProblemDetailService {
     private final ProblemFacade problemFacade;
     private final UserFacade userFacade;
     private final TestCaseRepository testCaseRepository;
+    private final ProblemCategoryRepository problemCategoryRepository;
 
     @Transactional(readOnly = true)
     public ProblemDetailResponse execute(Long problemId) {
@@ -33,6 +36,10 @@ public class QueryProblemDetailService {
             ? testCaseRepository.findAllByProblemOrderByTestcaseIdAsc(problem)
             : testCaseRepository.findAllByProblemAndIsSampleTrueOrderByTestcaseIdAsc(problem);
 
-        return ProblemDetailResponse.of(problem, testCases);
+        List<CategoryResponse> categories = problemCategoryRepository.findAllByProblemIds(List.of(problemId)).stream()
+            .map(problemCategory -> CategoryResponse.from(problemCategory.getCategory()))
+            .toList();
+
+        return ProblemDetailResponse.of(problem, categories, testCases);
     }
 }

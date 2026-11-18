@@ -57,6 +57,6 @@ class ProblemRankMappingTest {
 
     private ProblemRequest requestWithRankId(Long problemRankId) {
         return new ProblemRequest("title-" + UUID.randomUUID(), "content", 131072L, 1.5, problemRankId,
-            List.of(new TestCaseRequest("1 2", "3", true)));
+            List.of(new TestCaseRequest("1 2", "3", true)), List.of());
     }
 }

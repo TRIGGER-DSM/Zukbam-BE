@@ -136,7 +136,7 @@ class XpCompensationTest {
     private ProblemRequest requestWithRank(Problem problem, String rankName) {
         return new ProblemRequest(problem.getTitle(), "content", 131072L, 1.5,
             problemRankRepository.findByName(rankName).orElseThrow().getProblemRankId(),
-            List.of(new TestCaseRequest("1 2", "3", true)));
+            List.of(new TestCaseRequest("1 2", "3", true)), List.of());
     }
 
     private long xpOf(User user) {
