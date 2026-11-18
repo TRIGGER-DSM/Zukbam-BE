@@ -16,4 +16,8 @@ public class Category {
 
     @Column(columnDefinition = "VARCHAR(255)", unique = true, nullable = false, name = "name")
     private String name;
+
+    public void update(String name) {
+        this.name = name;
+    }
 }
