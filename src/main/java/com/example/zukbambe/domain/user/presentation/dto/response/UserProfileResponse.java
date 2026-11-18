@@ -4,6 +4,8 @@ import com.example.zukbambe.domain.user.domain.User;
 import com.example.zukbambe.domain.user.domain.enums.Role;
 import lombok.Builder;
 
+import java.time.LocalDateTime;
+
 @Builder
 public record UserProfileResponse(
     Long userId,
@@ -13,7 +15,8 @@ public record UserProfileResponse(
     Long xp,
     String rank,
     long solvedCount,
-    StudentInfoResponse student
+    StudentInfoResponse student,
+    LocalDateTime createdAt
 ) {
     public static UserProfileResponse of(User user, long solvedCount, StudentInfoResponse student) {
         return UserProfileResponse.builder()
@@ -25,6 +28,7 @@ public record UserProfileResponse(
             .rank(user.getRank().getName())
             .solvedCount(solvedCount)
             .student(student)
+            .createdAt(user.getCreatedAt())
             .build();
     }
 }
