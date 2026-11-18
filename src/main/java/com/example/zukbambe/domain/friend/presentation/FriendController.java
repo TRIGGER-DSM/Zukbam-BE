@@ -2,10 +2,12 @@ package com.example.zukbambe.domain.friend.presentation;
 
 import com.example.zukbambe.domain.friend.presentation.dto.request.FriendRequestRequest;
 import com.example.zukbambe.domain.friend.presentation.dto.response.FriendListResponse;
+import com.example.zukbambe.domain.friend.presentation.dto.response.FriendSolvedProblemListResponse;
 import com.example.zukbambe.domain.friend.presentation.dto.response.ReceivedFriendRequestListResponse;
 import com.example.zukbambe.domain.friend.service.AcceptFriendRequestService;
 import com.example.zukbambe.domain.friend.service.DeleteFriendService;
 import com.example.zukbambe.domain.friend.service.QueryFriendListService;
+import com.example.zukbambe.domain.friend.service.QueryFriendSolvedProblemListService;
 import com.example.zukbambe.domain.friend.service.QueryReceivedFriendRequestsService;
 import com.example.zukbambe.domain.friend.service.RejectFriendRequestService;
 import com.example.zukbambe.domain.friend.service.SendFriendRequestService;
@@ -38,6 +40,7 @@ public class FriendController {
     private final QueryReceivedFriendRequestsService queryReceivedFriendRequestsService;
     private final QueryFriendListService queryFriendListService;
     private final DeleteFriendService deleteFriendService;
+    private final QueryFriendSolvedProblemListService queryFriendSolvedProblemListService;
 
     /**
      * 친구 요청 보내기<p>
@@ -92,6 +95,19 @@ public class FriendController {
         @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size
     ) {
         return queryFriendListService.execute(page, size);
+    }
+
+    /**
+     * 친구가 최근에 푼 문제 목록 조회<p>
+     * 친구가 푼 문제 중 내가 아직 안 푼 문제만, 친구가 가장 최근에 푼 순서로 보여준다.
+     * 같은 문제를 여러 친구가 풀었으면 한 번만 나오고, 푼 친구들은 최근에 푼 순서로 함께 내려준다.
+     */
+    @GetMapping("/solved-problems")
+    public FriendSolvedProblemListResponse getFriendSolvedProblems(
+        @RequestParam(defaultValue = "0") @Min(0) int page,
+        @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size
+    ) {
+        return queryFriendSolvedProblemListService.execute(page, size);
     }
 
     /**
