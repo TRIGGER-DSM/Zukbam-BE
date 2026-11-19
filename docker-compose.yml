@@ -17,6 +17,7 @@ services:
       MAIL_PASSWORD: ${MAIL_PASSWORD:?MAIL_PASSWORD is required}
       AUTH_TEACHER_CODE: ${AUTH_TEACHER_CODE:?AUTH_TEACHER_CODE is required}
       JUDGE0_URL: http://judge0-server:2358
+      JUDGE0_REQUEST_TIMEOUT: ${JUDGE0_REQUEST_TIMEOUT:-60s}
       # Datadog APM (이미지에 들어 있는 dd-java-agent를 붙인다. DD_VERSION은 이미지 ENV에 있음)
       JAVA_TOOL_OPTIONS: -javaagent:/app/dd-java-agent.jar
       DD_AGENT_HOST: datadog-agent
