@@ -1,0 +1,22 @@
+{
+  "name": "[Zukbam-BE] 서버 응답 없음 (Datadog Agent)",
+  "type": "service check",
+  "query": "\"datadog.agent.up\".over(\"host:zukbam-home\").by(\"host\").last(2).count_by_status()",
+  "message": "{{#is_no_data}}🔴 10분 넘게 홈서버(zukbam-home)의 Datadog Agent 응답이 없습니다.\n서버 전원, 홈 인터넷, Docker, datadog-agent 컨테이너를 확인하세요.{{/is_no_data}}\n{{#is_alert}}🔴 Datadog Agent가 비정상 상태입니다.{{/is_alert}}\n{{#is_recovery}}✅ 홈서버 Datadog Agent가 다시 응답합니다.{{/is_recovery}}\n\n@webhook-discord",
+  "tags": [
+    "service:zukbam-be",
+    "env:prod",
+    "managed-by:monitoring/datadog"
+  ],
+  "options": {
+    "thresholds": {
+      "critical": 1,
+      "warning": 1,
+      "ok": 1
+    },
+    "notify_no_data": true,
+    "no_data_timeframe": 10,
+    "renotify_interval": 60,
+    "include_tags": true
+  }
+}

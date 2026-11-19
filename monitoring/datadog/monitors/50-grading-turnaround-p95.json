@@ -1,0 +1,21 @@
+{
+  "name": "[Zukbam-BE] 채점 소요시간 p95 30초 초과",
+  "type": "query alert",
+  "query": "percentile(last_15m):p95:zukbam.solution.turnaround_ms{*} > 30000",
+  "message": "{{#is_alert}}🐢 최근 15분간 제출~채점 완료 p95가 {{value}}ms입니다 (임계 30초).\n채점 대기열이 밀리고 있거나 Judge0 workers가 느릴 수 있습니다.{{/is_alert}}\n{{#is_recovery}}✅ 채점 소요시간이 정상으로 돌아왔습니다.{{/is_recovery}}\n\n@webhook-discord",
+  "tags": [
+    "service:zukbam-be",
+    "env:prod",
+    "managed-by:monitoring/datadog"
+  ],
+  "options": {
+    "notify_no_data": false,
+    "include_tags": true,
+    "renotify_interval": 60,
+    "require_full_window": false,
+    "thresholds": {
+      "critical": 30000,
+      "warning": 15000
+    }
+  }
+}

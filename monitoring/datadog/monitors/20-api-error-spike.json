@@ -1,0 +1,17 @@
+{
+  "name": "[Zukbam-BE] API 에러율 급증",
+  "type": "composite",
+  "query": "${MONITOR_ID:[Zukbam-BE] (조건) API 에러율 5% 초과} && ${MONITOR_ID:[Zukbam-BE] (조건) API 에러 5건 이상}",
+  "message": "{{#is_alert}}🚨 최근 5분간 API 에러율이 5%를 넘었고 에러가 5건 이상 발생했습니다.{{/is_alert}}\n{{#is_recovery}}✅ API 에러율이 정상으로 돌아왔습니다.{{/is_recovery}}\n\n- APM: https://us5.datadoghq.com/apm/services/zukbam-be/operations/servlet.request/resources?env=prod\n- 에러 로그: https://us5.datadoghq.com/logs?query=service%3Azukbam-be%20status%3Aerror\n\n@webhook-discord",
+  "tags": [
+    "service:zukbam-be",
+    "env:prod",
+    "managed-by:monitoring/datadog"
+  ],
+  "options": {
+    "notify_no_data": false,
+    "include_tags": true,
+    "renotify_interval": 60,
+    "require_full_window": false
+  }
+}

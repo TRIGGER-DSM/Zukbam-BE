@@ -1,0 +1,199 @@
+{
+  "name": "[Zukbam-BE] 로그인 → 문제 조회 → 내 정보",
+  "type": "api",
+  "subtype": "multi",
+  "status": "live",
+  "locations": [
+    "aws:ap-northeast-2"
+  ],
+  "tags": [
+    "service:zukbam-be",
+    "env:prod",
+    "managed-by:monitoring/datadog"
+  ],
+  "config": {
+    "configVariables": [
+      {
+        "type": "global",
+        "name": "ZUKBAM_BASE_URL",
+        "id": "${GLOBAL_VAR_ID:ZUKBAM_BASE_URL}"
+      },
+      {
+        "type": "global",
+        "name": "ZUKBAM_SYNTH_EMAIL",
+        "id": "${GLOBAL_VAR_ID:ZUKBAM_SYNTH_EMAIL}"
+      },
+      {
+        "type": "global",
+        "name": "ZUKBAM_SYNTH_PASSWORD",
+        "id": "${GLOBAL_VAR_ID:ZUKBAM_SYNTH_PASSWORD}"
+      }
+    ],
+    "steps": [
+      {
+        "name": "로그인",
+        "subtype": "http",
+        "allowFailure": false,
+        "isCritical": true,
+        "retry": {
+          "count": 1,
+          "interval": 1000
+        },
+        "request": {
+          "method": "POST",
+          "url": "{{ ZUKBAM_BASE_URL }}/auth/sign-in",
+          "headers": {
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+          },
+          "timeout": 10,
+          "body": "{\"email\": \"{{ ZUKBAM_SYNTH_EMAIL }}\", \"password\": \"{{ ZUKBAM_SYNTH_PASSWORD }}\"}",
+          "bodyType": "application/json"
+        },
+        "assertions": [
+          {
+            "type": "statusCode",
+            "operator": "is",
+            "target": 200
+          },
+          {
+            "type": "responseTime",
+            "operator": "lessThan",
+            "target": 3000
+          }
+        ],
+        "extractedValues": [
+          {
+            "name": "ACCESS_TOKEN",
+            "type": "http_body",
+            "parser": {
+              "type": "json_path",
+              "value": "$.accessToken"
+            },
+            "secure": true
+          }
+        ]
+      },
+      {
+        "name": "문제 목록 조회",
+        "subtype": "http",
+        "allowFailure": false,
+        "isCritical": true,
+        "retry": {
+          "count": 1,
+          "interval": 1000
+        },
+        "request": {
+          "method": "GET",
+          "url": "{{ ZUKBAM_BASE_URL }}/problems?page=0&size=1",
+          "headers": {
+            "Accept": "application/json",
+            "Authorization": "Bearer {{ ACCESS_TOKEN }}"
+          },
+          "timeout": 10
+        },
+        "assertions": [
+          {
+            "type": "statusCode",
+            "operator": "is",
+            "target": 200
+          },
+          {
+            "type": "responseTime",
+            "operator": "lessThan",
+            "target": 3000
+          }
+        ],
+        "extractedValues": [
+          {
+            "name": "PROBLEM_ID",
+            "type": "http_body",
+            "parser": {
+              "type": "json_path",
+              "value": "$.problems[0].problemId"
+            },
+            "secure": false
+          }
+        ]
+      },
+      {
+        "name": "문제 상세 조회",
+        "subtype": "http",
+        "allowFailure": false,
+        "isCritical": true,
+        "retry": {
+          "count": 1,
+          "interval": 1000
+        },
+        "request": {
+          "method": "GET",
+          "url": "{{ ZUKBAM_BASE_URL }}/problems/{{ PROBLEM_ID }}",
+          "headers": {
+            "Accept": "application/json",
+            "Authorization": "Bearer {{ ACCESS_TOKEN }}"
+          },
+          "timeout": 10
+        },
+        "assertions": [
+          {
+            "type": "statusCode",
+            "operator": "is",
+            "target": 200
+          },
+          {
+            "type": "responseTime",
+            "operator": "lessThan",
+            "target": 3000
+          }
+        ],
+        "extractedValues": []
+      },
+      {
+        "name": "내 정보 조회",
+        "subtype": "http",
+        "allowFailure": false,
+        "isCritical": true,
+        "retry": {
+          "count": 1,
+          "interval": 1000
+        },
+        "request": {
+          "method": "GET",
+          "url": "{{ ZUKBAM_BASE_URL }}/users/me",
+          "headers": {
+            "Accept": "application/json",
+            "Authorization": "Bearer {{ ACCESS_TOKEN }}"
+          },
+          "timeout": 10
+        },
+        "assertions": [
+          {
+            "type": "statusCode",
+            "operator": "is",
+            "target": 200
+          },
+          {
+            "type": "responseTime",
+            "operator": "lessThan",
+            "target": 3000
+          }
+        ],
+        "extractedValues": []
+      }
+    ]
+  },
+  "options": {
+    "tick_every": 3600,
+    "min_failure_duration": 0,
+    "min_location_failed": 1,
+    "retry": {
+      "count": 1,
+      "interval": 5000
+    },
+    "monitor_options": {
+      "renotify_interval": 60
+    },
+    "monitor_name": "[Zukbam-BE] Synthetics 로그인·문제 조회"
+  },
+  "message": "{{#is_alert}}🔴 외부에서 로그인·문제 조회 흐름이 실패했습니다 (재시도 후에도 실패).\n서버가 죽었거나, 공인 IP/포트 포워딩, 인증(JWT) 쪽 문제일 수 있습니다.{{/is_alert}}\n{{#is_recovery}}✅ 로그인·문제 조회 흐름이 복구됐습니다.{{/is_recovery}}\n\n@webhook-discord"
+}

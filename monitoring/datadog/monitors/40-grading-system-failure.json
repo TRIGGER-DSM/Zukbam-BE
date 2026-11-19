@@ -1,0 +1,21 @@
+{
+  "name": "[Zukbam-BE] 채점 시스템 실패 발생",
+  "type": "query alert",
+  "query": "sum(last_15m):sum:zukbam.solution.graded{system_failure:true}.as_count() >= 3",
+  "message": "{{#is_alert}}⚠️ 최근 15분간 채점 시스템 실패(INTERNAL_ERROR)가 {{value}}건 발생했습니다.\nJudge0 상태, 채점 대기열(queue_full), 테스트케이스 누락(no_testcase)을 확인하세요.{{/is_alert}}\n{{#is_recovery}}✅ 채점 시스템 실패가 멈췄습니다.{{/is_recovery}}\n\n- 실패 로그: https://us5.datadoghq.com/logs?query=service%3Azukbam-be%20%40solution.system_failure%3Atrue\n\n@webhook-discord",
+  "tags": [
+    "service:zukbam-be",
+    "env:prod",
+    "managed-by:monitoring/datadog"
+  ],
+  "options": {
+    "notify_no_data": false,
+    "include_tags": true,
+    "renotify_interval": 60,
+    "require_full_window": false,
+    "thresholds": {
+      "critical": 3,
+      "warning": 1
+    }
+  }
+}

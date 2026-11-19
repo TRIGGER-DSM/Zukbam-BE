@@ -1,0 +1,21 @@
+{
+  "name": "[Zukbam-BE] API p95 응답시간 2초 초과",
+  "type": "query alert",
+  "query": "percentile(last_10m):p95:trace.servlet.request{service:zukbam-be,env:prod} > 2",
+  "message": "{{#is_alert}}🐢 최근 10분간 API p95 응답시간이 {{value}}초입니다 (임계 2초).{{/is_alert}}\n{{#is_warning}}API p95 응답시간이 {{value}}초로 느려지고 있습니다.{{/is_warning}}\n{{#is_recovery}}✅ API 응답시간이 정상으로 돌아왔습니다.{{/is_recovery}}\n\n- APM: https://us5.datadoghq.com/apm/services/zukbam-be?env=prod\n\n@webhook-discord",
+  "tags": [
+    "service:zukbam-be",
+    "env:prod",
+    "managed-by:monitoring/datadog"
+  ],
+  "options": {
+    "notify_no_data": false,
+    "include_tags": true,
+    "renotify_interval": 60,
+    "require_full_window": false,
+    "thresholds": {
+      "critical": 2,
+      "warning": 1
+    }
+  }
+}

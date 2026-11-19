@@ -1,0 +1,21 @@
+{
+  "name": "[Zukbam-BE] 백엔드 앱 응답 없음",
+  "type": "query alert",
+  "query": "avg(last_5m):avg:jvm.heap_memory{service:zukbam-be,env:prod} < 0",
+  "message": "{{#is_no_data}}🔴 10분 넘게 백엔드(zukbam-be) JVM 메트릭이 들어오지 않습니다.\nbackend 컨테이너가 죽었거나 재시작을 반복하고 있을 수 있습니다. `docker compose -p zukbam ps`, `docker logs` 를 확인하세요.{{/is_no_data}}\n{{#is_recovery}}✅ 백엔드 앱이 다시 응답합니다.{{/is_recovery}}\n\n@webhook-discord",
+  "tags": [
+    "service:zukbam-be",
+    "env:prod",
+    "managed-by:monitoring/datadog"
+  ],
+  "options": {
+    "thresholds": {
+      "critical": 0
+    },
+    "notify_no_data": true,
+    "no_data_timeframe": 10,
+    "require_full_window": false,
+    "renotify_interval": 60,
+    "include_tags": true
+  }
+}

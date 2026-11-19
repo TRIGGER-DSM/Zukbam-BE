@@ -1,0 +1,49 @@
+{
+  "name": "Zukbam-BE (Spring Boot)",
+  "is_enabled": true,
+  "filter": {
+    "query": "service:zukbam-be source:java"
+  },
+  "processors": [
+    {
+      "type": "grok-parser",
+      "name": "Spring Boot 콘솔 로그 + metrics.solution key=value",
+      "is_enabled": true,
+      "source": "message",
+      "samples": [
+        "2026-11-02T08:28:16.854+0000  INFO [judge-1] [dd.trace_id=0 dd.span_id=0] metrics.solution : event=grading_completed solution_id=1 problem_id=1 language=PYTHON result=WRONG_ANSWER system_failure=false judge_ms=1 turnaround_ms=39 exec_time_ms=10 memory_kb=2000",
+        "2026-11-02T08:28:16.818+0000  INFO [http-nio-8080-exec-1] [dd.trace_id=690714a000000000a1b2c3d4e5f60718 dd.span_id=1234567890123456789] metrics.solution : event=solution_submitted solution_id=1 problem_id=1 language=PYTHON",
+        "2026-11-02T08:28:17.089+0000 ERROR [judge-3] [dd.trace_id=0 dd.span_id=0] c.e.z.d.s.service.GradeSolutionService : 채점에 실패했습니다. solutionId=5\n\njava.lang.IllegalStateException: judge0 down\n\tat com.example.zukbambe.domain.solution.service.GradeSolutionService.execute(GradeSolutionService.java:58) ~[main/:na]",
+        "2026-11-02T08:28:17.585+0000  INFO [SpringApplicationShutdownHook] [dd.trace_id=0 dd.span_id=0] com.zaxxer.hikari.HikariDataSource : HikariPool-1 - Shutdown completed."
+      ],
+      "grok": {
+        "support_rules": "_header %{date(\"yyyy-MM-dd'T'HH:mm:ss.SSSZ\"):timestamp}\\s+%{word:level} \\[%{data:logger.thread_name}\\] \\[dd\\.trace_id=%{notSpace:dd.trace_id} dd\\.span_id=%{notSpace:dd.span_id}\\]",
+        "match_rules": "solution_metric %{_header} metrics\\.solution : %{data:solution:keyvalue}\napp_log %{_header} %{notSpace:logger.name} : %{data:msg}"
+      }
+    },
+    {
+      "type": "date-remapper",
+      "name": "로그 시각",
+      "is_enabled": true,
+      "sources": [
+        "timestamp"
+      ]
+    },
+    {
+      "type": "status-remapper",
+      "name": "로그 레벨",
+      "is_enabled": true,
+      "sources": [
+        "level"
+      ]
+    },
+    {
+      "type": "trace-id-remapper",
+      "name": "APM trace 연결",
+      "is_enabled": true,
+      "sources": [
+        "dd.trace_id"
+      ]
+    }
+  ]
+}

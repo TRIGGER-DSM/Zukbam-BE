@@ -1,0 +1,20 @@
+{
+  "name": "[Zukbam-BE] (조건) API 에러 5건 이상",
+  "type": "query alert",
+  "query": "sum(last_5m):sum:trace.servlet.request.errors{service:zukbam-be,env:prod}.as_count() >= 5",
+  "message": "composite 모니터의 조건으로만 쓴다. 알림은 '[Zukbam-BE] API 에러율 급증'에서 보낸다.",
+  "tags": [
+    "service:zukbam-be",
+    "env:prod",
+    "managed-by:monitoring/datadog"
+  ],
+  "options": {
+    "notify_no_data": false,
+    "include_tags": true,
+    "renotify_interval": 0,
+    "require_full_window": false,
+    "thresholds": {
+      "critical": 5
+    }
+  }
+}

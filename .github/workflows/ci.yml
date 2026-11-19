@@ -10,6 +10,29 @@ permissions:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: zukbam
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
 
@@ -21,6 +44,12 @@ jobs:
 
       - name: Build & Test
         run: ./gradlew build
+        env:
+          DB_URL: jdbc:postgresql://localhost:5432/zukbam
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
+          JPA_DDL_AUTO: validate
+          JWT_SECRET: zukbam-ci-secret-key-must-be-at-least-32-bytes
 
   publish-image:
     needs: build-and-test
@@ -38,5 +67,6 @@ jobs:
 
       - name: Build and push image
         run: |
-          docker build -t ghcr.io/${{ github.repository }}:latest .
-          docker push ghcr.io/${{ github.repository }}:latest
+          IMAGE=ghcr.io/$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]'):latest
+          docker build --build-arg DD_VERSION="${GITHUB_SHA::7}" -t "$IMAGE" .
+          docker push "$IMAGE"
