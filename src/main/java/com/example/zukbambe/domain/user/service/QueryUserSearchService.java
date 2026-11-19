@@ -36,7 +36,7 @@ public class QueryUserSearchService {
 
         // 숫자 4자리면 학번으로, 아니면 이름으로 찾는다
         Page<User> users = STUDENT_CODE.matcher(trimmed).matches()
-            ? userRepository.searchByStudentCode(myUserId, Integer.parseInt(trimmed), pageRequest)
+            ? searchByStudentCode(myUserId, Integer.parseInt(trimmed), pageRequest)
             : userRepository.searchByName(myUserId, trimmed, pageRequest);
 
         List<Long> userIds = users.getContent().stream().map(User::getUserId).toList();
@@ -44,5 +44,12 @@ public class QueryUserSearchService {
             .collect(Collectors.toMap(Student::getUserId, StudentInfoResponse::from));
 
         return UserSearchListResponse.of(users, studentByUserId);
+    }
+
+    // 4자리 학번을 학년(첫째 자리), 반(둘째 자리), 번호(뒤 두 자리)로 나눠 각각 비교한다
+    private Page<User> searchByStudentCode(Long myUserId, int code, PageRequest pageRequest) {
+        return userRepository.searchByStudentCode(
+            myUserId, (short) (code / 1000), (short) (code / 100 % 10), (short) (code % 100), pageRequest
+        );
     }
 }

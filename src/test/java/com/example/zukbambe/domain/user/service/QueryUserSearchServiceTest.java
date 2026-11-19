@@ -131,6 +131,18 @@ class QueryUserSearchServiceTest {
     }
 
     @Test
+    void 학년_반_번호를_각각_비교하므로_다른_학번과_섞이지_않는다() {
+        // 1학년 1반 105번은 예전 계산식(1000 + 100 + 105)으로는 1205와 같았다
+        User overflowed = newStudent(token + "가", 1, 1, 105);
+        User target = newStudent(token + "나", 1, 2, 5);
+
+        assertThat(queryUserSearchService.execute("1205", 0, 100).users())
+            .extracting(UserSearchResponse::userId)
+            .contains(target.getUserId())
+            .doesNotContain(overflowed.getUserId());
+    }
+
+    @Test
     void 숫자_4자리는_이름이_아니라_학번으로만_찾는다() {
         // 이름이 "9876"인 유저는 학번 9876인 학생이 없으니 "9876"으로 검색해도 나오지 않는다
         User namedAsNumber = newUser("9876", Role.STUDENT);

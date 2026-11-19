@@ -106,7 +106,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
         """)
     Page<User> searchByName(@Param("myUserId") Long myUserId, @Param("name") String name, Pageable pageable);
 
-    // 학번(학년 * 1000 + 반 * 100 + 번호)이 정확히 같은 학생을 찾는다. 나 자신은 뺀다
+    // 학년, 반, 번호가 모두 같은 학생을 찾는다. 나 자신은 뺀다
     @EntityGraph(attributePaths = "rank")
     @Query("""
         select u
@@ -116,13 +116,17 @@ public interface UserRepository extends JpaRepository<User, Long> {
               select 1
               from Student s
               where s.user = u
-                and s.grade * 1000 + s.classNumber * 100 + s.studentNumber = :studentCode
+                and s.grade = :grade
+                and s.classNumber = :classNumber
+                and s.studentNumber = :studentNumber
           )
         order by u.name, u.userId
         """)
     Page<User> searchByStudentCode(
         @Param("myUserId") Long myUserId,
-        @Param("studentCode") int studentCode,
+        @Param("grade") short grade,
+        @Param("classNumber") short classNumber,
+        @Param("studentNumber") short studentNumber,
         Pageable pageable
     );
 }
