@@ -7,7 +7,6 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
@@ -39,7 +38,8 @@ public class StudentSignUpRequest {
     @NotNull(message = "반은 비어있을 수 없습니다.")
     private Short classNumber;
 
-    @Positive(message = "번호는 양수여야 합니다.")
+    @Min(value = 1, message = "번호는 1~20 사이여야 합니다.")
+    @Max(value = 20, message = "번호는 1~20 사이여야 합니다.")
     @NotNull(message = "번호는 비어있을 수 없습니다.")
     private Short number;
 
