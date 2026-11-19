@@ -1,29 +1,35 @@
 name: CD
 on:
-  workflow_run:
-    workflows: ["CI"]
-    branches: [develop]
-    types: [completed]
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: '배포할 태그 (예: v1.0.0)'
+        required: true
 
 permissions:
   contents: read
-  packages: read
+
+concurrency:
+  group: prod-deploy
+  cancel-in-progress: false
 
 jobs:
   deploy:
-    if: github.event.workflow_run.conclusion == 'success'
-    runs-on: self-hosted
+    runs-on: [self-hosted, prod]
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ env.TAG }}
+          fetch-depth: 0
 
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify tag is on main
+        run: |
+          git fetch origin main
+          git merge-base --is-ancestor HEAD origin/main || { echo "태그 $TAG 는 main에 포함되어 있지 않습니다"; exit 1; }
 
       - name: Deploy
         env:
@@ -39,8 +45,9 @@ jobs:
           JUDGE0_DB_PASSWORD: ${{ secrets.JUDGE0_DB_PASSWORD }}
           JUDGE0_REDIS_PASSWORD: ${{ secrets.JUDGE0_REDIS_PASSWORD }}
           DD_API_KEY: ${{ secrets.DD_API_KEY }}
+          DD_HOSTNAME: zukbam-prod
         run: |
-          export APP_IMAGE=ghcr.io/$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]'):latest
-          docker compose -p zukbam pull backend
+          export APP_IMAGE=zukbam-be:$TAG
+          docker build --build-arg DD_VERSION="$TAG" -t "$APP_IMAGE" .
           docker compose -p zukbam up -d --remove-orphans
           docker image prune -f
