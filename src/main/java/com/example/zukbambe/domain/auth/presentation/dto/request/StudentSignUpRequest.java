@@ -38,8 +38,8 @@ public class StudentSignUpRequest {
     @NotNull(message = "반은 비어있을 수 없습니다.")
     private Short classNumber;
 
-    @Min(value = 1, message = "번호는 1~99 사이여야 합니다.")
-    @Max(value = 99, message = "번호는 1~99 사이여야 합니다.")
+    @Min(value = 1, message = "번호는 1~20 사이여야 합니다.")
+    @Max(value = 20, message = "번호는 1~20 사이여야 합니다.")
     @NotNull(message = "번호는 비어있을 수 없습니다.")
     private Short number;
 
