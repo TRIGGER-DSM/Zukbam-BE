@@ -1,7 +1,6 @@
 name: CI
 on:
   push:
-    branches-ignore: [main]
 
 permissions:
   contents: read
@@ -53,7 +52,7 @@ jobs:
 
   publish-image:
     needs: build-and-test
-    if: github.ref == 'refs/heads/develop'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

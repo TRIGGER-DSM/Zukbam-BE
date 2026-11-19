@@ -2,7 +2,7 @@ name: CD
 on:
   workflow_run:
     workflows: ["CI"]
-    branches: [develop]
+    branches: [main]
     types: [completed]
 
 permissions:
@@ -12,7 +12,7 @@ permissions:
 jobs:
   deploy:
     if: github.event.workflow_run.conclusion == 'success'
-    runs-on: self-hosted
+    runs-on: [self-hosted, prod]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -39,6 +39,7 @@ jobs:
           JUDGE0_DB_PASSWORD: ${{ secrets.JUDGE0_DB_PASSWORD }}
           JUDGE0_REDIS_PASSWORD: ${{ secrets.JUDGE0_REDIS_PASSWORD }}
           DD_API_KEY: ${{ secrets.DD_API_KEY }}
+          DD_HOSTNAME: zukbam-prod
         run: |
           export APP_IMAGE=ghcr.io/$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]'):latest
           docker compose -p zukbam pull backend
