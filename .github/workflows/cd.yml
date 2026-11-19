@@ -18,6 +18,7 @@ concurrency:
 jobs:
   deploy:
     runs-on: [self-hosted, prod]
+    environment: prod
     env:
       TAG: ${{ github.event.inputs.tag || github.ref_name }}
     steps:
@@ -45,7 +46,8 @@ jobs:
           JUDGE0_DB_PASSWORD: ${{ secrets.JUDGE0_DB_PASSWORD }}
           JUDGE0_REDIS_PASSWORD: ${{ secrets.JUDGE0_REDIS_PASSWORD }}
           DD_API_KEY: ${{ secrets.DD_API_KEY }}
-          DD_HOSTNAME: zukbam-prod
+          DD_ENV: ${{ vars.DD_ENV }}
+          DD_HOSTNAME: ${{ vars.DD_HOSTNAME }}
         run: |
           export APP_IMAGE=zukbam-be:$TAG
           docker build --build-arg DD_VERSION="$TAG" -t "$APP_IMAGE" .
