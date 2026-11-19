@@ -112,4 +112,12 @@ public interface SolvedHistoryRepository extends JpaRepository<SolvedHistory, So
         @Param("friendIds") Collection<Long> friendIds,
         @Param("problemIds") Collection<Long> problemIds
     );
+
+    // 푼 사람 한 명당 문제 ID 한 줄씩 가져온다. 문제별로 세면 푼 사람 수가 된다
+    @Query("""
+        select s.id.problemId
+        from SolvedHistory s
+        where s.id.problemId in :problemIds
+        """)
+    List<Long> findSolverProblemIds(@Param("problemIds") Collection<Long> problemIds);
 }

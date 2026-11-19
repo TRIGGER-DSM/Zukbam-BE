@@ -9,8 +9,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface SolutionRepository extends JpaRepository<Solution, Long> {
 
@@ -57,4 +59,30 @@ public interface SolutionRepository extends JpaRepository<Solution, Long> {
         @Param("start") LocalDateTime start,
         @Param("end") LocalDateTime end
     );
+
+    @Query("""
+        select distinct s.problem.problemId
+        from Solution s
+        where s.user.userId = :userId
+          and s.problem.problemId in :problemIds
+        """)
+    Set<Long> findAttemptedProblemIds(
+        @Param("userId") Long userId,
+        @Param("problemIds") Collection<Long> problemIds
+    );
+
+    // 푼 사람이 처음 정답을 받기까지 낸 제출 한 번당 문제 ID 한 줄씩 가져온다. 순서는 시각 대신 solutionId로 비교한다
+    @Query("""
+        select s.problem.problemId
+        from Solution s
+        where s.problem.problemId in :problemIds
+          and s.solutionId <= (
+              select min(a.solutionId)
+              from Solution a
+              where a.problem = s.problem
+                and a.user = s.user
+                and a.status = com.example.zukbambe.domain.solution.domain.enums.Status.ACCEPTED
+          )
+        """)
+    List<Long> findAttemptProblemIds(@Param("problemIds") Collection<Long> problemIds);
 }
