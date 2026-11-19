@@ -1,6 +1,9 @@
 package com.example.zukbambe.domain.user.domain.repository;
 
 import com.example.zukbambe.domain.user.domain.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -91,4 +94,39 @@ public interface UserRepository extends JpaRepository<User, Long> {
         nativeQuery = true
     )
     int recalculateXp(@Param("userId") Long userId);
+
+    // 이름의 일부로 찾는다. 대소문자는 구분하지 않고 나 자신은 뺀다
+    @EntityGraph(attributePaths = "rank")
+    @Query("""
+        select u
+        from User u
+        where u.userId <> :myUserId
+          and locate(lower(:name), lower(u.name)) > 0
+        order by u.name, u.userId
+        """)
+    Page<User> searchByName(@Param("myUserId") Long myUserId, @Param("name") String name, Pageable pageable);
+
+    // 학년, 반, 번호가 모두 같은 학생을 찾는다. 나 자신은 뺀다
+    @EntityGraph(attributePaths = "rank")
+    @Query("""
+        select u
+        from User u
+        where u.userId <> :myUserId
+          and exists (
+              select 1
+              from Student s
+              where s.user = u
+                and s.grade = :grade
+                and s.classNumber = :classNumber
+                and s.studentNumber = :studentNumber
+          )
+        order by u.name, u.userId
+        """)
+    Page<User> searchByStudentCode(
+        @Param("myUserId") Long myUserId,
+        @Param("grade") short grade,
+        @Param("classNumber") short classNumber,
+        @Param("studentNumber") short studentNumber,
+        Pageable pageable
+    );
 }
