@@ -1,10 +1,13 @@
 package com.example.zukbambe.domain.solution.presentation;
 
+import com.example.zukbambe.domain.solution.presentation.dto.request.RunSolutionRequest;
 import com.example.zukbambe.domain.solution.presentation.dto.request.SubmitSolutionRequest;
+import com.example.zukbambe.domain.solution.presentation.dto.response.RunSolutionResponse;
 import com.example.zukbambe.domain.solution.presentation.dto.response.SolutionListResponse;
 import com.example.zukbambe.domain.solution.presentation.dto.response.SolutionResponse;
 import com.example.zukbambe.domain.solution.service.QuerySolutionDetailService;
 import com.example.zukbambe.domain.solution.service.QuerySolutionListService;
+import com.example.zukbambe.domain.solution.service.RunSolutionService;
 import com.example.zukbambe.domain.solution.service.SubmitSolutionService;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,6 +35,7 @@ public class SolutionController {
     private final SubmitSolutionService submitSolutionService;
     private final QuerySolutionListService querySolutionListService;
     private final QuerySolutionDetailService querySolutionDetailService;
+    private final RunSolutionService runSolutionService;
 
     /**
      * 풀이 제출<p>
@@ -47,6 +51,19 @@ public class SolutionController {
         Long solutionId = submitSolutionService.execute(problemId, request);
         URI location = URI.create("/solutions/" + solutionId);
         return ResponseEntity.created(location).build();
+    }
+
+    /**
+     * 풀이 실행<p>
+     * 채점 전에 입력값을 직접 넣어 실행해 볼 수 있다. 문제의 시간·메모리 제한이 적용되고 결과는 저장하지 않는다.
+     * 입력은 최대 5개이고 1분에 10번까지 실행할 수 있다. 결과는 inputs 순서대로 나온다.
+     */
+    @PostMapping("/{problemId}/run")
+    public RunSolutionResponse runSolution(
+        @PathVariable Long problemId,
+        @RequestBody @Valid RunSolutionRequest request
+    ) {
+        return runSolutionService.execute(problemId, request);
     }
 
     /**

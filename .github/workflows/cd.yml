@@ -43,6 +43,8 @@ jobs:
           MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
           MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
           AUTH_TEACHER_CODE: ${{ secrets.AUTH_TEACHER_CODE }}
+          SWAGGER_USERNAME: ${{ secrets.SWAGGER_USERNAME }}
+          SWAGGER_PASSWORD: ${{ secrets.SWAGGER_PASSWORD }}
           JUDGE0_DB_PASSWORD: ${{ secrets.JUDGE0_DB_PASSWORD }}
           JUDGE0_REDIS_PASSWORD: ${{ secrets.JUDGE0_REDIS_PASSWORD }}
           DD_API_KEY: ${{ secrets.DD_API_KEY }}
@@ -51,5 +53,7 @@ jobs:
         run: |
           export APP_IMAGE=zukbam-be:$TAG
           docker build --build-arg DD_VERSION="$TAG" -t "$APP_IMAGE" .
-          docker compose -p zukbam up -d --remove-orphans
+          docker compose -p zukbam build judge0-server
+          # 쉬고 있는 색을 새 버전으로 띄우고, 준비되면 proxy를 돌린 뒤 이전 색을 내린다
+          ./deploy/blue-green.sh
           docker image prune -f

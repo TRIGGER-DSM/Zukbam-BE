@@ -28,6 +28,12 @@ spring:
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:}
 
+  # 종료할 때 처리 중인 요청과 채점이 끝나기를 기다리는 최대 시간.
+  # 채점 대기열은 메모리에만 있어서, 이 시간을 넘긴 채점은 PENDING으로 남았다가 다음 기동 때 다시 채점된다.
+  # judge0.idle-timeout(2분)보다 길어야 하고, docker-compose.yml의 stop_grace_period보다는 짧아야 한다
+  lifecycle:
+    timeout-per-shutdown-phase: 150s
+
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
     port: ${MAIL_PORT:587}
@@ -47,6 +53,23 @@ spring:
 # HTTPS 프록시 뒤에서 원래 요청의 스킴·호스트를 X-Forwarded-* 헤더로 인식한다 (Swagger 서버 주소가 http로 잡히지 않도록)
 server:
   forward-headers-strategy: framework
+  # 종료 신호를 받으면 새 요청은 받지 않고 처리 중인 요청을 끝낸 뒤 내려간다
+  shutdown: graceful
+
+# 헬스체크만 연다. 배포 스크립트는 /actuator/health/readiness로 새 인스턴스가 준비됐는지 확인한다
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  health:
+    # 헬스체크마다 SMTP 서버에 접속하지 않도록 끈다
+    mail:
+      enabled: false
 
 springdoc:
   api-docs:
@@ -58,6 +81,11 @@ springdoc:
     persist-authorization: true
   default-produces-media-type: application/json
   override-with-generic-response: false
+
+swagger:
+  auth:
+    username: ${SWAGGER_USERNAME:}
+    password: ${SWAGGER_PASSWORD:}
 
 jwt:
   header: ${JWT_HEADER:Authorization}

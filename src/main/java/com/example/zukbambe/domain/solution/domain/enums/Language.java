@@ -13,6 +13,7 @@ public enum Language {
     JAVA("Java", JudgeLanguage.JAVA),
     PYTHON("Python", JudgeLanguage.PYTHON),
     JAVASCRIPT("JavaScript", JudgeLanguage.JAVASCRIPT),
+    ASSEMBLY("Assembly (NASM x64)", JudgeLanguage.ASSEMBLY),
     TEXT("Text", JudgeLanguage.TEXT);
 
     @JsonValue

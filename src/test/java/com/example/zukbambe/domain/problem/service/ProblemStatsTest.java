@@ -3,6 +3,7 @@ package com.example.zukbambe.domain.problem.service;
 import com.example.zukbambe.domain.problem.domain.Problem;
 import com.example.zukbambe.domain.problem.domain.enums.ProblemSolveStatus;
 import com.example.zukbambe.domain.problem.domain.repository.ProblemRepository;
+import com.example.zukbambe.domain.problem.presentation.dto.response.ProblemDetailResponse;
 import com.example.zukbambe.domain.problem.presentation.dto.response.ProblemSummaryResponse;
 import com.example.zukbambe.domain.rank.domain.repository.ProblemRankRepository;
 import com.example.zukbambe.domain.rank.domain.repository.UserRankRepository;
@@ -44,6 +45,8 @@ class ProblemStatsTest {
 
     @Autowired
     private QueryProblemListService queryProblemListService;
+    @Autowired
+    private QueryProblemDetailService queryProblemDetailService;
     @Autowired
     private ProblemRepository problemRepository;
     @Autowired
@@ -115,6 +118,40 @@ class ProblemStatsTest {
 
         assertThat(summary.solverCount()).isZero();
         assertThat(summary.averageAttempts()).isNull();
+    }
+
+    @Test
+    void 상세에도_목록과_같은_푼_사람_수와_평균_시도가_나온다() {
+        Problem problem = newProblem();
+        User threeTries = newUser();
+        User oneTry = newUser();
+        User neverSolved = newUser();
+        submit(threeTries, problem, WRONG_ANSWER);
+        submit(threeTries, problem, WRONG_ANSWER);
+        submit(threeTries, problem, ACCEPTED);
+        solved(threeTries, problem);
+        submit(oneTry, problem, ACCEPTED);
+        solved(oneTry, problem);
+        submit(neverSolved, problem, WRONG_ANSWER);
+
+        ProblemDetailResponse detail = queryProblemDetailService.execute(problem.getProblemId());
+        ProblemSummaryResponse summary = lastProblems(1).getFirst();
+
+        assertThat(detail.solverCount()).isEqualTo(2);
+        assertThat(detail.averageAttempts()).isEqualTo(2.0);
+        assertThat(detail.solverCount()).isEqualTo(summary.solverCount());
+        assertThat(detail.averageAttempts()).isEqualTo(summary.averageAttempts());
+    }
+
+    @Test
+    void 상세에서_푼_사람이_없으면_0명이고_평균_시도는_null이다() {
+        Problem problem = newProblem();
+        submit(newUser(), problem, WRONG_ANSWER);
+
+        ProblemDetailResponse detail = queryProblemDetailService.execute(problem.getProblemId());
+
+        assertThat(detail.solverCount()).isZero();
+        assertThat(detail.averageAttempts()).isNull();
     }
 
     @Test

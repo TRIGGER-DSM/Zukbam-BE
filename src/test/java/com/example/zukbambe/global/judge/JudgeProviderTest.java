@@ -3,6 +3,7 @@ package com.example.zukbambe.global.judge;
 import com.example.zukbambe.global.judge.dto.JudgeCase;
 import com.example.zukbambe.global.judge.dto.JudgeRequest;
 import com.example.zukbambe.global.judge.dto.JudgeResult;
+import com.example.zukbambe.global.judge.dto.JudgeRunResult;
 import com.example.zukbambe.global.judge.enums.JudgeLanguage;
 import com.example.zukbambe.global.judge.enums.JudgeStatus;
 import com.example.zukbambe.global.judge.exception.JudgeSubmitFailedException;
@@ -25,10 +26,12 @@ import org.springframework.web.util.UriComponentsBuilder;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Deque;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,6 +51,7 @@ class JudgeProviderTest {
     private int submittedCount;
     private boolean rejectSubmission;
     private boolean unavailable;
+    private final List<String> fetchedFields = new ArrayList<>();
 
     private JudgeProvider judgeProvider;
 
@@ -140,6 +144,57 @@ class JudgeProviderTest {
             .isInstanceOf(RuntimeException.class);
     }
 
+    @Test
+    void 실행하면_입력_순서대로_줄바꿈된_base64_출력을_디코딩해서_돌려준다() {
+        String longOutput = "긴 출력입니다. 줄바꿈이 들어가는 base64를 확인합니다.\n두 번째 줄\n세 번째 줄\n";
+        givenRunCase(longOutput, null, null, Judge0Status.ACCEPTED);
+        givenRunCase("3\n", null, null, Judge0Status.ACCEPTED);
+
+        List<JudgeRunResult> results = judgeProvider.run(request(2));
+
+        assertThat(results).containsExactly(
+            new JudgeRunResult(JudgeStatus.ACCEPTED, longOutput, null, null, 0.010, 1000L),
+            new JudgeRunResult(JudgeStatus.ACCEPTED, "3\n", null, null, 0.010, 1000L)
+        );
+    }
+
+    @Test
+    void 실행하다_런타임_에러가_나면_stderr를_돌려준다() {
+        givenRunCase(null, "Traceback (most recent call last):\nZeroDivisionError: division by zero\n", null,
+            Judge0Status.RUNTIME_ERROR_NZEC);
+
+        JudgeRunResult result = judgeProvider.run(request(1)).get(0);
+
+        assertThat(result.status()).isEqualTo(JudgeStatus.RUNTIME_ERROR);
+        assertThat(result.stderr()).isEqualTo("Traceback (most recent call last):\nZeroDivisionError: division by zero\n");
+        assertThat(result.stdout()).isNull();
+    }
+
+    @Test
+    void 실행하다_컴파일_에러가_나면_compileOutput을_돌려준다() {
+        givenRunCase(null, null, "Main.java:1: error: ';' expected\n", Judge0Status.COMPILATION_ERROR);
+
+        JudgeRunResult result = judgeProvider.run(request(1)).get(0);
+
+        assertThat(result.status()).isEqualTo(JudgeStatus.COMPILE_ERROR);
+        assertThat(result.compileOutput()).isEqualTo("Main.java:1: error: ';' expected\n");
+    }
+
+    @Test
+    void 채점은_출력을_조회하지_않고_실행은_출력까지_조회한다() {
+        givenCase("0.010", 1000L, Judge0Status.ACCEPTED);
+        judgeProvider.judge(request(1));
+        assertThat(fetchedFields).isNotEmpty().allMatch(fields -> !fields.contains("stdout"));
+
+        fakeCases.clear();
+        fetchedFields.clear();
+        submittedCount = 0;
+        givenRunCase("3\n", null, null, Judge0Status.ACCEPTED);
+        judgeProvider.run(request(1));
+        assertThat(fetchedFields).isNotEmpty()
+            .allMatch(fields -> fields.contains("stdout") && fields.contains("stderr") && fields.contains("compile_output"));
+    }
+
     private void assertStatus(Judge0Status judge0Status, JudgeStatus expected) {
         fakeCases.clear();
         submittedCount = 0;
@@ -151,6 +206,10 @@ class JudgeProviderTest {
     // statuses는 조회할 때마다 하나씩 넘어가고, 마지막 상태에서 멈춘다
     private void givenCase(String time, Long memory, Judge0Status... statuses) {
         fakeCases.add(new FakeCase(new ArrayDeque<>(Arrays.asList(statuses)), time, memory));
+    }
+
+    private void givenRunCase(String stdout, String stderr, String compileOutput, Judge0Status status) {
+        fakeCases.add(new FakeCase(new ArrayDeque<>(List.of(status)), "0.010", 1000L, stdout, stderr, compileOutput));
     }
 
     private JudgeRequest request(int caseCount) {
@@ -184,9 +243,13 @@ class JudgeProviderTest {
     }
 
     private String fetchResponse(ClientHttpRequest request) {
-        String tokens = UriComponentsBuilder.fromUri(request.getURI()).build().getQueryParams().getFirst("tokens");
+        var params = UriComponentsBuilder.fromUri(request.getURI()).build().getQueryParams();
+        String tokens = params.getFirst("tokens");
+        String fields = params.getFirst("fields");
+        fetchedFields.add(fields);
+        boolean withOutput = fields.contains("stdout");
         return Arrays.stream(tokens.split(","))
-            .map(token -> fakeCases.get(Integer.parseInt(token.substring(1))).poll(token))
+            .map(token -> fakeCases.get(Integer.parseInt(token.substring(1))).poll(token, withOutput))
             .collect(Collectors.joining(",", "{\"submissions\":[", "]}"));
     }
 
@@ -194,17 +257,38 @@ class JudgeProviderTest {
         return withSuccess(body, MediaType.APPLICATION_JSON).createResponse(request);
     }
 
-    private record FakeCase(Deque<Judge0Status> statuses, String time, Long memory) {
+    private record FakeCase(
+        Deque<Judge0Status> statuses, String time, Long memory, String stdout, String stderr, String compileOutput
+    ) {
 
-        String poll(String token) {
+        FakeCase(Deque<Judge0Status> statuses, String time, Long memory) {
+            this(statuses, time, memory, null, null, null);
+        }
+
+        String poll(String token, boolean withOutput) {
             Judge0Status status = statuses.size() > 1 ? statuses.poll() : statuses.peek();
             boolean finished = status.isFinished();
-            return "{\"token\":\"%s\",\"status\":{\"id\":%d,\"description\":\"\"},\"time\":%s,\"memory\":%s}".formatted(
+            String output = withOutput
+                ? ",\"stdout\":%s,\"stderr\":%s,\"compile_output\":%s".formatted(
+                    ruby(stdout), ruby(stderr), ruby(compileOutput))
+                : "";
+            return "{\"token\":\"%s\",\"status\":{\"id\":%d,\"description\":\"\"},\"time\":%s,\"memory\":%s%s}".formatted(
                 token,
                 status.getId(),
                 finished && time != null ? "\"" + time + "\"" : "null",
-                finished ? memory : null
+                finished ? memory : null,
+                output
             );
+        }
+
+        // Judge0는 Ruby의 Base64.encode64로 인코딩한다. 60자마다 줄바꿈이 들어가고 끝에도 줄바꿈이 붙는다
+        private static String ruby(String value) {
+            if (value == null) {
+                return "null";
+            }
+            String encoded = Base64.getMimeEncoder(60, "\n".getBytes(StandardCharsets.UTF_8))
+                .encodeToString(value.getBytes(StandardCharsets.UTF_8)) + "\n";
+            return objectMapper.writeValueAsString(encoded);
         }
     }
 }
