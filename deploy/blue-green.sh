@@ -67,6 +67,9 @@ fi
 
 compose up -d "${INFRA_SERVICES[@]}"
 
+# backend는 --no-deps로 띄우므로, Judge0 언어 정의(Java 21)를 먼저 등록해 둔다. 실패하면 이전 색이 그대로 서비스한다
+compose run --rm --no-deps judge0-languages || { echo "Judge0 언어 등록에 실패했습니다" >&2; exit 1; }
+
 ACTIVE=""
 if is_running proxy; then
     ACTIVE="$(compose exec -T proxy active-color)"
