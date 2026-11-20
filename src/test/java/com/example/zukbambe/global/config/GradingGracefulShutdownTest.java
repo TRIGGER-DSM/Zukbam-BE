@@ -16,7 +16,9 @@ import com.example.zukbambe.domain.user.domain.User;
 import com.example.zukbambe.domain.user.domain.enums.Role;
 import com.example.zukbambe.domain.user.domain.repository.UserRepository;
 import com.example.zukbambe.global.judge.JudgeProvider;
+import com.example.zukbambe.global.judge.dto.JudgeRequest;
 import com.example.zukbambe.global.judge.dto.JudgeResult;
+import com.example.zukbambe.global.judge.dto.JudgeRunResult;
 import com.example.zukbambe.global.judge.enums.JudgeStatus;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -29,6 +31,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -45,13 +48,21 @@ class GradingGracefulShutdownTest {
     @Test
     void 종료할_때_진행_중인_채점을_끝까지_반영한다() throws Exception {
         CountDownLatch judgeStarted = new CountDownLatch(1);
-        JudgeProvider slowJudgeProvider = request -> {
-            // 다른 테스트가 남긴 PENDING 풀이가 기동 시 복구되면서 들어올 수 있어서, 이 테스트의 풀이만 느리게 채점한다
-            if (SLOW_CODE.equals(request.code())) {
-                judgeStarted.countDown();
-                sleep(JUDGE_MILLIS);
+        JudgeProvider slowJudgeProvider = new JudgeProvider() {
+            @Override
+            public JudgeResult judge(JudgeRequest request) {
+                // 다른 테스트가 남긴 PENDING 풀이가 기동 시 복구되면서 들어올 수 있어서, 이 테스트의 풀이만 느리게 채점한다
+                if (SLOW_CODE.equals(request.code())) {
+                    judgeStarted.countDown();
+                    sleep(JUDGE_MILLIS);
+                }
+                return new JudgeResult(JudgeStatus.ACCEPTED, 0.01, 1000L);
             }
-            return new JudgeResult(JudgeStatus.ACCEPTED, 0.01, 1000L);
+
+            @Override
+            public List<JudgeRunResult> run(JudgeRequest request) {
+                return List.of();
+            }
         };
 
         ConfigurableApplicationContext context = new SpringApplicationBuilder(ZukbamBeApplication.class)
