@@ -5,6 +5,8 @@ import com.example.zukbambe.domain.category.presentation.dto.response.CategoryRe
 import com.example.zukbambe.domain.problem.domain.Problem;
 import com.example.zukbambe.domain.problem.facade.ProblemFacade;
 import com.example.zukbambe.domain.problem.presentation.dto.response.ProblemDetailResponse;
+import com.example.zukbambe.domain.solution.domain.repository.SolutionRepository;
+import com.example.zukbambe.domain.solvedhistory.domain.repository.SolvedHistoryRepository;
 import com.example.zukbambe.domain.testcase.domain.TestCase;
 import com.example.zukbambe.domain.testcase.domain.repository.TestCaseRepository;
 import com.example.zukbambe.domain.user.domain.enums.Role;
@@ -23,6 +25,8 @@ public class QueryProblemDetailService {
     private final UserFacade userFacade;
     private final TestCaseRepository testCaseRepository;
     private final ProblemCategoryRepository problemCategoryRepository;
+    private final SolvedHistoryRepository solvedHistoryRepository;
+    private final SolutionRepository solutionRepository;
 
     @Transactional(readOnly = true)
     public ProblemDetailResponse execute(Long problemId) {
@@ -40,6 +44,11 @@ public class QueryProblemDetailService {
             .map(problemCategory -> CategoryResponse.from(problemCategory.getCategory()))
             .toList();
 
-        return ProblemDetailResponse.of(problem, categories, testCases);
+        // 목록과 같은 쿼리로 센다. 푼 사람 한 명, 제출 한 번이 한 줄이다
+        long solverCount = solvedHistoryRepository.findSolverProblemIds(List.of(problemId)).size();
+        long attemptCount = solutionRepository.findAttemptProblemIds(List.of(problemId)).size();
+        Double averageAttempts = solverCount == 0 ? null : (double) attemptCount / solverCount;
+
+        return ProblemDetailResponse.of(problem, categories, solverCount, averageAttempts, testCases);
     }
 }

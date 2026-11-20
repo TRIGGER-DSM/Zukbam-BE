@@ -17,9 +17,18 @@ public record ProblemDetailResponse(
     Double timeLimit,
     ProblemRankResponse rank,
     List<CategoryResponse> categories,
+    long solverCount,
+    Double averageAttempts,
     List<TestCaseResponse> testCases
 ) {
-    public static ProblemDetailResponse of(Problem problem, List<CategoryResponse> categories, List<TestCase> testCases) {
+    // averageAttempts는 푼 사람이 없으면 null이다
+    public static ProblemDetailResponse of(
+        Problem problem,
+        List<CategoryResponse> categories,
+        long solverCount,
+        Double averageAttempts,
+        List<TestCase> testCases
+    ) {
         return ProblemDetailResponse.builder()
             .problemId(problem.getProblemId())
             .title(problem.getTitle())
@@ -28,6 +37,8 @@ public record ProblemDetailResponse(
             .timeLimit(problem.getTimeLimit())
             .rank(ProblemRankResponse.from(problem.getRank()))
             .categories(categories)
+            .solverCount(solverCount)
+            .averageAttempts(averageAttempts)
             .testCases(testCases.stream().map(TestCaseResponse::from).toList())
             .build();
     }
