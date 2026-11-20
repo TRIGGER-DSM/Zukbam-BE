@@ -14,6 +14,7 @@ import com.example.zukbambe.global.judge.dto.JudgeRequest;
 import com.example.zukbambe.global.judge.dto.JudgeRunResult;
 import com.example.zukbambe.global.judge.enums.JudgeLanguage;
 import com.example.zukbambe.global.judge.enums.JudgeStatus;
+import com.example.zukbambe.global.judge.exception.JudgeTimeoutException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -108,6 +110,27 @@ class RunSolutionServiceTest {
         runSolutionService.execute(PROBLEM_ID, request());
 
         assertThat(redisTemplate.getExpire(key)).isPositive();
+    }
+
+    @Test
+    void 채점과_같은_풀의_스레드에서_실행한다() {
+        AtomicReference<String> threadName = new AtomicReference<>();
+        given(judgeProvider.run(any())).willAnswer(invocation -> {
+            threadName.set(Thread.currentThread().getName());
+            return List.of(new JudgeRunResult(JudgeStatus.ACCEPTED, "3\n", null, null, 0.01, 1000L));
+        });
+
+        runSolutionService.execute(PROBLEM_ID, request());
+
+        assertThat(threadName.get()).startsWith("judge-");
+    }
+
+    @Test
+    void 채점기가_실패하면_그_예외를_그대로_던진다() {
+        given(judgeProvider.run(any())).willThrow(new JudgeTimeoutException());
+
+        assertThatThrownBy(() -> runSolutionService.execute(PROBLEM_ID, request()))
+            .isInstanceOf(JudgeTimeoutException.class);
     }
 
     private RunSolutionRequest request() {
