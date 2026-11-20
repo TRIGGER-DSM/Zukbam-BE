@@ -40,6 +40,8 @@ services:
         condition: service_healthy
       judge0-server:
         condition: service_started
+      judge0-languages:
+        condition: service_completed_successfully
 
   db:
     image: postgres:16
@@ -72,7 +74,8 @@ services:
 
   # Judge0 API에는 인증이 없으므로 ports를 열지 않고 compose 내부망에서만 쓴다
   judge0-server:
-    image: judge0/judge0:1.13.1
+    build: ./judge0
+    image: zukbam-judge0:1.13.1-jdk21
     restart: unless-stopped
     privileged: true
     environment: &judge0-env
@@ -90,12 +93,38 @@ services:
         condition: service_healthy
 
   judge0-workers:
-    image: judge0/judge0:1.13.1
+    build: ./judge0
+    image: zukbam-judge0:1.13.1-jdk21
     command: ["./scripts/workers"]
     restart: unless-stopped
     privileged: true
     environment: *judge0-env
     depends_on: *judge0-depends
+
+  # Judge0의 언어 정의는 DB에 있어서, Java 21(id 100)을 넣어 둔다. 여러 번 실행해도 같은 결과다
+  judge0-languages:
+    image: postgres:16
+    restart: "no"
+    environment:
+      PGHOST: judge0-db
+      PGUSER: judge0
+      PGDATABASE: judge0
+      PGPASSWORD: ${JUDGE0_DB_PASSWORD:?JUDGE0_DB_PASSWORD is required}
+    command:
+      - sh
+      - -c
+      - |
+        # 새 DB는 judge0-server가 테이블을 만들 때까지 기다린다
+        for i in $$(seq 1 60); do
+          [ "$$(psql -tAc "select to_regclass('languages') is not null")" = "t" ] && break
+          sleep 2
+        done
+        psql -v ON_ERROR_STOP=1 -c "insert into languages (id, name, source_file, compile_cmd, run_cmd, is_archived) values (100, 'Java (OpenJDK 21)', 'Main.java', '/usr/local/openjdk21/bin/javac %s Main.java', '/usr/local/openjdk21/bin/java Main', false) on conflict (id) do update set name = excluded.name, source_file = excluded.source_file, compile_cmd = excluded.compile_cmd, run_cmd = excluded.run_cmd, is_archived = excluded.is_archived"
+    depends_on:
+      judge0-db:
+        condition: service_healthy
+      judge0-server:
+        condition: service_started
 
   judge0-db:
     image: postgres:16

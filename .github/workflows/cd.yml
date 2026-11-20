@@ -51,5 +51,6 @@ jobs:
         run: |
           export APP_IMAGE=zukbam-be:$TAG
           docker build --build-arg DD_VERSION="$TAG" -t "$APP_IMAGE" .
+          docker compose -p zukbam build judge0-server
           docker compose -p zukbam up -d --remove-orphans
           docker image prune -f

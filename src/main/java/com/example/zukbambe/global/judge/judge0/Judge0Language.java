@@ -12,7 +12,8 @@ import java.util.Arrays;
 public enum Judge0Language {
     C99(JudgeLanguage.C99, 50, "-std=c99"),
     CPP17(JudgeLanguage.CPP17, 54, "-std=c++17"),
-    JAVA(JudgeLanguage.JAVA, 62, null),
+    // 직접 만든 Judge0 이미지의 OpenJDK 21 (docker-compose.yml의 judge0-languages가 등록한다)
+    JAVA(JudgeLanguage.JAVA, 100, null),
     PYTHON(JudgeLanguage.PYTHON, 71, null),
     JAVASCRIPT(JudgeLanguage.JAVASCRIPT, 63, null),
     TEXT(JudgeLanguage.TEXT, 43, null);
