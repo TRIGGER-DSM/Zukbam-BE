@@ -44,7 +44,6 @@ public class QueryProblemDetailService {
             .map(problemCategory -> CategoryResponse.from(problemCategory.getCategory()))
             .toList();
 
-        // 목록과 같은 쿼리로 센다. 푼 사람 한 명, 제출 한 번이 한 줄이다
         long solverCount = solvedHistoryRepository.findSolverProblemIds(List.of(problemId)).size();
         long attemptCount = solutionRepository.findAttemptProblemIds(List.of(problemId)).size();
         Double averageAttempts = solverCount == 0 ? null : (double) attemptCount / solverCount;
