@@ -1,10 +1,13 @@
 services:
+  # stag처럼 컨테이너 하나를 교체하는 서버에서 쓴다. prod는 아래 backend-blue/backend-green과 proxy를 쓴다
   backend:
-    image: ${APP_IMAGE:?APP_IMAGE is required}
+    image: &backend-image ${APP_IMAGE:?APP_IMAGE is required}
     restart: unless-stopped
+    # 종료할 때 진행 중인 채점을 기다린다 (application.yaml의 timeout-per-shutdown-phase보다 길게)
+    stop_grace_period: 3m
     ports:
       - "8080:8080"
-    environment:
+    environment: &backend-environment
       DB_URL: ${DB_URL:?DB_URL is required}
       DB_USERNAME: ${DB_USERNAME:?DB_USERNAME is required}
       DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
@@ -27,19 +30,51 @@ services:
       DD_RUNTIME_METRICS_ENABLED: "true"
       # 프로파일러는 Student Pack 범위 밖이고 alpine(musl)에서 네이티브 라이브러리 문제가 있어 끈다
       DD_PROFILING_ENABLED: "false"
-    labels:
+    labels: &backend-labels
       com.datadoghq.tags.service: zukbam-be
       com.datadoghq.tags.env: ${DD_ENV:-prod}
       # 이 컨테이너 로그만 수집한다. 앱 로그(날짜)나 tracer 자체 로그([dd.trace)로 시작하지 않는 줄은
       # 스택트레이스로 보고 앞 로그에 붙인다
       com.datadoghq.ad.logs: '[{"source":"java","service":"zukbam-be","log_processing_rules":[{"type":"multi_line","name":"log_start","pattern":"(\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}|\\[dd\\.trace )"}]}]'
-    depends_on:
+    depends_on: &backend-depends-on
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
       judge0-server:
         condition: service_started
+
+  # prod 무중단 배포(blue-green)용. deploy/blue-green.sh가 쉬고 있는 색을 새 버전으로 띄우고,
+  # 헬스체크가 통과하면 proxy를 그쪽으로 돌린 뒤 이전 색을 내린다.
+  # profile을 걸어 두어서 `docker compose up -d`만으로는 뜨지 않는다
+  backend-blue: &backend-color
+    profiles: [blue-green]
+    image: *backend-image
+    restart: unless-stopped
+    stop_grace_period: 3m
+    environment: *backend-environment
+    labels: *backend-labels
+    depends_on: *backend-depends-on
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health/readiness | grep -q '\"status\":\"UP\"'"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 2m
+
+  backend-green: *backend-color
+
+  # 외부 요청(8080)을 받아 지금 살아 있는 색으로 넘긴다. 어느 색인지는 proxy-state 볼륨에 남아서 재시작해도 유지된다
+  proxy:
+    profiles: [blue-green]
+    # 태그는 deploy/blue-green.sh가 설정 파일 내용의 해시로 정한다
+    image: ${PROXY_IMAGE:-zukbam-proxy}
+    build: ./deploy/proxy
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - proxy-state:/etc/nginx/state
 
   db:
     image: postgres:16
@@ -153,3 +188,4 @@ volumes:
   redisdata:
   judge0-pgdata:
   datadog-run:
+  proxy-state:
