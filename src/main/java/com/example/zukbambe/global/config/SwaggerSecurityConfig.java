@@ -20,7 +20,7 @@ public class SwaggerSecurityConfig {
 
     private final SwaggerAuthProperties swaggerAuthProperties;
 
-    // Swagger 문서 경로만 맡는 체인. API용 체인(SecurityConfig)보다 먼저 매칭되고, JWT가 아니라 문서 전용 계정(Basic)으로 로그인한다
+    // Swagger 문서 경로만 맡고, 문서 전용 계정(Basic)으로 로그인한다
     @Bean
     @Order(1)
     public SecurityFilterChain swaggerFilterChain(HttpSecurity http) throws Exception {
