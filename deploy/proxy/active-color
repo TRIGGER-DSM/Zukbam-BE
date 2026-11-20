@@ -1,5 +1,5 @@
 #!/bin/sh
-# 지금 요청을 받는 색을 출력한다
+# 지금 요청을 받고 있는 색(blue 또는 green)을 출력한다
 set -e
 
 sed -n 's/.*backend-\(blue\|green\);.*/\1/p' /etc/nginx/state/active.conf

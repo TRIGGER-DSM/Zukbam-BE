@@ -35,6 +35,8 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+// 무중단 배포에서는 이전 인스턴스가 내려갈 때 채점 중이던 풀이를 새 인스턴스가 다시 집어 가지 않으므로,
+// 내려가는 쪽이 끝까지 채점해서 반영해야 한다
 class GradingGracefulShutdownTest {
 
     private static final String SLOW_CODE = "slow code";
@@ -44,7 +46,7 @@ class GradingGracefulShutdownTest {
     void 종료할_때_진행_중인_채점을_끝까지_반영한다() throws Exception {
         CountDownLatch judgeStarted = new CountDownLatch(1);
         JudgeProvider slowJudgeProvider = request -> {
-            // 기동 시 복구되는 다른 PENDING 풀이는 바로 채점한다
+            // 다른 테스트가 남긴 PENDING 풀이가 기동 시 복구되면서 들어올 수 있어서, 이 테스트의 풀이만 느리게 채점한다
             if (SLOW_CODE.equals(request.code())) {
                 judgeStarted.countDown();
                 sleep(JUDGE_MILLIS);

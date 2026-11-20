@@ -1,5 +1,6 @@
 #!/bin/sh
-# 사용법: switch-color blue|green
+# 요청을 받을 색을 바꾼다. 사용법: switch-color blue|green
+# reload는 처리 중인 요청을 끊지 않는다. 기존 worker가 받던 요청을 끝낸 뒤 내려가고, 새 요청은 새 색으로 간다
 set -e
 
 color="$1"
@@ -19,5 +20,4 @@ if ! nginx -t 2>/dev/null; then
 fi
 
 rm -f "$state.bak"
-# reload는 처리 중인 요청을 끊지 않는다
 nginx -s reload
