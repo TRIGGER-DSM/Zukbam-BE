@@ -10,7 +10,8 @@ import org.springframework.http.HttpStatus;
 public enum SolutionErrorCode implements ErrorProperty {
     SOLUTION_NOT_FOUND(HttpStatus.NOT_FOUND, "SO001", "풀이를 찾을 수 없습니다."),
     TOO_MANY_SUBMISSIONS(HttpStatus.TOO_MANY_REQUESTS, "SO002", "제출이 너무 많습니다. 잠시 후 다시 시도해주세요."),
-    TOO_MANY_RUNS(HttpStatus.TOO_MANY_REQUESTS, "SO003", "실행이 너무 많습니다. 잠시 후 다시 시도해주세요.");
+    TOO_MANY_RUNS(HttpStatus.TOO_MANY_REQUESTS, "SO003", "실행이 너무 많습니다. 잠시 후 다시 시도해주세요."),
+    RUN_QUEUE_FULL(HttpStatus.TOO_MANY_REQUESTS, "SO004", "실행 대기열이 가득 찼습니다. 잠시 후 다시 시도해주세요.");
 
     private final HttpStatus status;
     private final String code;

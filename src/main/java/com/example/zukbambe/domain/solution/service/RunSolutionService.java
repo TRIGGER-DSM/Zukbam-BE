@@ -2,6 +2,7 @@ package com.example.zukbambe.domain.solution.service;
 
 import com.example.zukbambe.domain.problem.domain.Problem;
 import com.example.zukbambe.domain.problem.facade.ProblemFacade;
+import com.example.zukbambe.domain.solution.exception.RunQueueFullException;
 import com.example.zukbambe.domain.solution.exception.TooManyRunsException;
 import com.example.zukbambe.domain.solution.presentation.dto.request.RunSolutionRequest;
 import com.example.zukbambe.domain.solution.presentation.dto.response.RunSolutionResponse;
@@ -9,13 +10,18 @@ import com.example.zukbambe.domain.user.facade.UserFacade;
 import com.example.zukbambe.global.judge.JudgeProvider;
 import com.example.zukbambe.global.judge.dto.JudgeCase;
 import com.example.zukbambe.global.judge.dto.JudgeRequest;
+import com.example.zukbambe.global.judge.dto.JudgeRunResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.core.task.TaskRejectedException;
 import org.springframework.data.redis.core.script.RedisScript;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 @Service
 @RequiredArgsConstructor
@@ -35,8 +41,8 @@ public class RunSolutionService {
     private final ProblemFacade problemFacade;
     private final JudgeProvider judgeProvider;
     private final StringRedisTemplate redisTemplate;
+    private final ThreadPoolTaskExecutor judgeExecutor;
 
-    // 실행이 끝날 때까지 기다리므로 트랜잭션(DB 커넥션)을 잡지 않는다
     public RunSolutionResponse execute(Long problemId, RunSolutionRequest request) {
         Long userId = userFacade.getCurrentUserId();
         Problem problem = problemFacade.getProblemById(problemId);
@@ -46,13 +52,26 @@ public class RunSolutionService {
             .map(input -> new JudgeCase(input, null))
             .toList();
 
-        return RunSolutionResponse.from(judgeProvider.run(new JudgeRequest(
+        JudgeRequest judgeRequest = new JudgeRequest(
             request.language().getJudgeLanguage(),
             request.code(),
             cases,
             problem.getTimeLimit(),
             problem.getMemoryLimit()
-        )));
+        );
+
+        return RunSolutionResponse.from(run(judgeRequest));
+    }
+
+    // 채점과 같은 풀을 써서, 실행이 몰려 풀이 가득 차면 대기 중인 정상 제출이 INTERNAL_ERROR로 확정될 수 있다
+    private List<JudgeRunResult> run(JudgeRequest judgeRequest) {
+        try {
+            return CompletableFuture.supplyAsync(() -> judgeProvider.run(judgeRequest), judgeExecutor).join();
+        } catch (TaskRejectedException e) {
+            throw new RunQueueFullException();
+        } catch (CompletionException e) {
+            throw e.getCause() instanceof RuntimeException cause ? cause : e;
+        }
     }
 
     private void checkRunLimit(Long userId) {
