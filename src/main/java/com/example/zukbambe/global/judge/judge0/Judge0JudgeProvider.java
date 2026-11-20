@@ -4,6 +4,7 @@ import com.example.zukbambe.global.judge.JudgeProvider;
 import com.example.zukbambe.global.judge.dto.JudgeCase;
 import com.example.zukbambe.global.judge.dto.JudgeRequest;
 import com.example.zukbambe.global.judge.dto.JudgeResult;
+import com.example.zukbambe.global.judge.dto.JudgeRunResult;
 import com.example.zukbambe.global.judge.enums.JudgeStatus;
 import com.example.zukbambe.global.judge.exception.JudgeFetchFailedException;
 import com.example.zukbambe.global.judge.exception.JudgeSubmitFailedException;
@@ -35,14 +36,24 @@ public class Judge0JudgeProvider implements JudgeProvider {
     // Judge0 batch 요청 한 번에 보낼 수 있는 최대 개수 (MAX_SUBMISSION_BATCH_SIZE 기본값)
     private static final int BATCH_SIZE = 20;
 
+    private static final String JUDGE_FIELDS = "token,status,time,memory";
+    private static final String RUN_FIELDS = JUDGE_FIELDS + ",stdout,stderr,compile_output";
+
     private final RestClient judge0RestClient;
     private final Judge0Properties judge0Properties;
 
     @Override
     public JudgeResult judge(JudgeRequest request) {
         List<String> tokens = submit(request);
-        Map<String, Judge0SubmissionResponse> finished = poll(tokens);
+        Map<String, Judge0SubmissionResponse> finished = poll(tokens, JUDGE_FIELDS);
         return aggregate(tokens.stream().map(finished::get).toList());
+    }
+
+    @Override
+    public List<JudgeRunResult> run(JudgeRequest request) {
+        List<String> tokens = submit(request);
+        Map<String, Judge0SubmissionResponse> finished = poll(tokens, RUN_FIELDS);
+        return tokens.stream().map(finished::get).map(this::toRunResult).toList();
     }
 
     private List<String> submit(JudgeRequest request) {
@@ -82,7 +93,7 @@ public class Judge0JudgeProvider implements JudgeProvider {
     }
 
     // 끝난 테스트케이스가 idleTimeout 동안 하나도 늘지 않음을 Judge0가 멈춘 것으로 간주
-    private Map<String, Judge0SubmissionResponse> poll(List<String> tokens) {
+    private Map<String, Judge0SubmissionResponse> poll(List<String> tokens, String fields) {
         Map<String, Judge0SubmissionResponse> finished = new HashMap<>();
         long lastProgress = System.nanoTime();
 
@@ -92,7 +103,7 @@ public class Judge0JudgeProvider implements JudgeProvider {
             int before = finished.size();
             List<String> pending = tokens.stream().filter(token -> !finished.containsKey(token)).toList();
             for (List<String> chunk : chunk(pending)) {
-                fetch(chunk).stream()
+                fetch(chunk, fields).stream()
                     .filter(submission -> Judge0Status.from(submission.status().id()).isFinished())
                     .forEach(submission -> finished.put(submission.token(), submission));
             }
@@ -106,10 +117,10 @@ public class Judge0JudgeProvider implements JudgeProvider {
         return finished;
     }
 
-    private List<Judge0SubmissionResponse> fetch(List<String> tokens) {
+    private List<Judge0SubmissionResponse> fetch(List<String> tokens, String fields) {
         Judge0BatchResponse response = judge0RestClient.get()
             .uri("/submissions/batch?tokens=" + String.join(",", tokens)
-                + "&base64_encoded=true&fields=token,status,time,memory")
+                + "&base64_encoded=true&fields=" + fields)
             .retrieve()
             .body(Judge0BatchResponse.class);
 
@@ -142,11 +153,30 @@ public class Judge0JudgeProvider implements JudgeProvider {
         return new JudgeResult(status, time, memory);
     }
 
+    private JudgeRunResult toRunResult(Judge0SubmissionResponse result) {
+        return new JudgeRunResult(
+            Judge0Status.from(result.status().id()).getJudgeStatus(),
+            decode(result.stdout()),
+            decode(result.stderr()),
+            decode(result.compileOutput()),
+            result.time() == null ? null : Double.valueOf(result.time()),
+            result.memory()
+        );
+    }
+
     private String encode(String value) {
         if (value == null) {
             return null;
         }
         return Base64.getEncoder().encodeToString(value.getBytes(StandardCharsets.UTF_8));
+    }
+
+    // Judge0는 Base64.encode64로 인코딩해서 60자마다 줄바꿈이 들어간다
+    private String decode(String value) {
+        if (value == null) {
+            return null;
+        }
+        return new String(Base64.getMimeDecoder().decode(value), StandardCharsets.UTF_8);
     }
 
     private void sleep(Duration duration) {
