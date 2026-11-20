@@ -15,6 +15,8 @@ public enum Judge0Language {
     JAVA(JudgeLanguage.JAVA, 62, null),
     PYTHON(JudgeLanguage.PYTHON, 71, null),
     JAVASCRIPT(JudgeLanguage.JAVASCRIPT, 63, null),
+    // NASM 2.14.02, elf64로 어셈블하고 링크한다
+    ASSEMBLY(JudgeLanguage.ASSEMBLY, 45, null),
     TEXT(JudgeLanguage.TEXT, 43, null);
 
     private final JudgeLanguage language;

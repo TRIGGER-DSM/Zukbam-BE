@@ -6,5 +6,6 @@ public enum JudgeLanguage {
     JAVA,
     PYTHON,
     JAVASCRIPT,
+    ASSEMBLY,
     TEXT
 }
