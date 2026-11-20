@@ -8,7 +8,7 @@ public record SwaggerAuthProperties(
     String username,
     String password
 ) {
-    // 계정이 없으면 로그인 없이 연다
+    // 계정이 설정되지 않은 환경(로컬, 테스트)에서는 로그인 없이 문서를 연다
     public boolean isEnabled() {
         return StringUtils.hasText(username) && StringUtils.hasText(password);
     }

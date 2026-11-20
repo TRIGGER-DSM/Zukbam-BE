@@ -28,6 +28,7 @@ public class SecurityConfig {
 
     private final JwtParser jwtParser;
 
+    // Swagger 문서 경로는 SwaggerSecurityConfig의 체인이 먼저 맡으므로 여기서는 다루지 않는다
     @Bean
     @Order(2)
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
