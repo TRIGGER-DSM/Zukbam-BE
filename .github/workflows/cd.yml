@@ -51,6 +51,5 @@ jobs:
         run: |
           export APP_IMAGE=zukbam-be:$TAG
           docker build --build-arg DD_VERSION="$TAG" -t "$APP_IMAGE" .
-          # 쉬고 있는 색을 새 버전으로 띄우고, 준비되면 proxy를 돌린 뒤 이전 색을 내린다
           ./deploy/blue-green.sh
           docker image prune -f
