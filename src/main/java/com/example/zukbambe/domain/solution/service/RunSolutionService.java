@@ -11,6 +11,7 @@ import com.example.zukbambe.global.judge.dto.JudgeCase;
 import com.example.zukbambe.global.judge.dto.JudgeRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -22,6 +23,13 @@ public class RunSolutionService {
 
     private static final int RUN_LIMIT = 10;
     private static final Duration RUN_WINDOW = Duration.ofMinutes(1);
+    private static final RedisScript<Long> RUN_COUNT_SCRIPT = RedisScript.of("""
+        local count = redis.call('INCR', KEYS[1])
+        if redis.call('TTL', KEYS[1]) < 0 then
+            redis.call('EXPIRE', KEYS[1], ARGV[1])
+        end
+        return count
+        """, Long.class);
 
     private final UserFacade userFacade;
     private final ProblemFacade problemFacade;
@@ -48,11 +56,9 @@ public class RunSolutionService {
     }
 
     private void checkRunLimit(Long userId) {
-        String key = "solution-run:" + userId;
-        Long count = redisTemplate.opsForValue().increment(key);
-        if (count != null && count == 1) {
-            redisTemplate.expire(key, RUN_WINDOW);
-        }
+        Long count = redisTemplate.execute(
+            RUN_COUNT_SCRIPT, List.of("solution-run:" + userId), String.valueOf(RUN_WINDOW.toSeconds())
+        );
         if (count != null && count > RUN_LIMIT) {
             throw new TooManyRunsException();
         }
