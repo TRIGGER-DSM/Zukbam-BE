@@ -59,6 +59,12 @@ springdoc:
   default-produces-media-type: application/json
   override-with-generic-response: false
 
+# Swagger 문서(/swagger-ui, /v3/api-docs)에 거는 로그인 계정. 둘 중 하나라도 비어 있으면 로그인 없이 열린다
+swagger:
+  auth:
+    username: ${SWAGGER_USERNAME:}
+    password: ${SWAGGER_PASSWORD:}
+
 jwt:
   header: ${JWT_HEADER:Authorization}
   prefix: ${JWT_PREFIX:Bearer }
