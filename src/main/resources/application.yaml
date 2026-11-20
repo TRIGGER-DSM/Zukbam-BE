@@ -82,6 +82,11 @@ springdoc:
   default-produces-media-type: application/json
   override-with-generic-response: false
 
+swagger:
+  auth:
+    username: ${SWAGGER_USERNAME:}
+    password: ${SWAGGER_PASSWORD:}
+
 jwt:
   header: ${JWT_HEADER:Authorization}
   prefix: ${JWT_PREFIX:Bearer }
