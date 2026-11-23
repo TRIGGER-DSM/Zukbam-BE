@@ -3,10 +3,12 @@ package com.example.zukbambe.domain.solution.metric;
 import com.example.zukbambe.domain.solution.domain.enums.Language;
 import com.example.zukbambe.domain.solution.domain.enums.Status;
 import com.example.zukbambe.domain.solution.service.dto.GradedSolution;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.StringJoiner;
@@ -18,9 +20,12 @@ import java.util.StringJoiner;
  * 값에 공백이 들어가지 않게 하고, 코드·이메일 같은 개인 정보는 남기지 않는다.
  */
 @Component
+@RequiredArgsConstructor
 public class SolutionMetricLogger {
 
     private static final Logger log = LoggerFactory.getLogger("metrics.solution");
+
+    private final Clock clock;
 
     public void submitted(Long solutionId, Long problemId, Language language) {
         log.info(new Fields("solution_submitted")
@@ -60,12 +65,12 @@ public class SolutionMetricLogger {
             .toString());
     }
 
-    // submittedAt은 JPA Auditing이 시스템 시계로 채우므로 같은 시계로 잰다
+    // submittedAt은 JPA Auditing이 서비스 시계로 채우므로 같은 시계로 잰다
     private Long turnaroundMillis(LocalDateTime submittedAt) {
         if (submittedAt == null) {
             return null;
         }
-        return Math.max(0, Duration.between(submittedAt, LocalDateTime.now()).toMillis());
+        return Math.max(0, Duration.between(submittedAt, LocalDateTime.now(clock)).toMillis());
     }
 
     private static final class Fields {
